@@ -68,12 +68,11 @@
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-<script src="project/data.js" onerror="window.RM_DATA=window.RM_DATA||[];"></script>
+<script src="data.js" onerror="window.RM_DATA=window.RM_DATA||[];"></script>
 <script>
-// GitHub Pages fallback: ถ้า project/data.js โหลดไม่ได้หรือ RM_DATA ยังไม่ได้ set
 if (typeof window.RM_DATA === 'undefined') {
   window.RM_DATA = [];
-  console.warn('KST-RM: window.RM_DATA ไม่พบ — ตรวจสอบว่ามีไฟล์ project/data.js อยู่ใน repo');
+  console.warn('KST-RM: data.js not loaded — RM_DATA set to empty array');
 }
 </script>
 <script type="text/babel">
