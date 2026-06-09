@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>แจ้งวัตถุดิบเข้าประจำวัน — KST-RM UPDATE V2</title>
+<meta name="description" content="KST Raw Material Daily Report — แจ้งวัตถุดิบเข้าประจำวัน" />
+<meta name="theme-color" content="#1a73e8" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%230b3d82'/><text x='16' y='21' text-anchor='middle' font-size='12' font-weight='700' fill='white' font-family='sans-serif'>KST</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue: #1a73e8;
+    --blue-dark: #1666d0;
+    --ink: #202124;
+    --ink-2: #3c4043;
+    --muted: #5f6368;
+    --faint: #80868b;
+    --line: #e6e8eb;
+    --line-soft: #eef0f2;
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --group: #f1f3f4;
+    --hover: #f6f9fe;
+    --live: #e8456b;      /* กุ้งเป็น */
+    --dong: #5b6b7b;      /* กุ้งดอง */
+    --white-sp: #1a73e8;  /* กุ้งขาว */
+    --black-sp: #2b2f36;  /* กุ้งกุลาดำ */
+    --sea: #0f9488;       /* กุ้งทะเล */
+    --good: #1e8e5a;
+    --shadow: 0 1px 2px rgba(60,64,67,.10), 0 1px 3px rgba(60,64,67,.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+  #root { height: 100vh; }
+  .num { font-variant-numeric: tabular-nums; }
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-thumb {
+    background: #d3d7dc;
+    border-radius: 8px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #b9bec5;
+    background-clip: content-box;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input { font-family: inherit; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="project/data.js" onerror="window.RM_DATA=window.RM_DATA||[];"></script>
+<script>
+// GitHub Pages fallback: ถ้า project/data.js โหลดไม่ได้หรือ RM_DATA ยังไม่ได้ set
+if (typeof window.RM_DATA === 'undefined') {
+  window.RM_DATA = [];
+  console.warn('KST-RM: window.RM_DATA ไม่พบ — ตรวจสอบว่ามีไฟล์ project/data.js อยู่ใน repo');
+}
+</script>
+<script type="text/babel">
+/* global React, ReactDOM */
+const { useState, useMemo, useRef, useEffect } = React;
+
+/* ---------- helpers ---------- */
+const DATA = (window.RM_DATA || []).slice();
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const TH_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const TH_DOW = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+
+function parseD(s) { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d); }
+function fmtDate(s) { const dt = parseD(s); return `${MONTHS[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`; }
+function fmtThaiLong(s) { const dt = parseD(s); return `${TH_DOW[dt.getDay()]}ที่ ${dt.getDate()} ${TH_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`; }
+function nf(n) { return n == null || isNaN(n) ? "–" : Math.round(n).toLocaleString("en-US"); }
+function nf1(n) { return n == null || isNaN(n) ? "–" : (Math.round(n*10)/10).toLocaleString("en-US"); }
+
+const maxDateStr = DATA.reduce((a,b) => b.d > a ? b.d : a, "0000-00-00");
+const MAXD = parseD(maxDateStr);
+
+/* ---------- icons ---------- */
+const Icon = ({ d, size=22, sw=1.8, fill }) =>
+  <svg width={size} height={size} viewBox="0 0 24 24"
+    fill={fill||"none"} stroke={fill?"none":"currentColor"}
+    strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">{d}</svg>;
+
+const I = {
+  menu:     <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>,
+  bank:     <><line x1="3" y1="21" x2="21" y2="21"/><path d="M3 10l9-6 9 6"/><line x1="5" y1="10" x2="5" y2="21"/><line x1="12" y1="10" x2="12" y2="21"/><line x1="19" y1="10" x2="19" y2="21"/></>,
+  download: <><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></>,
+  list:     <><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></>,
+  truck:    <><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></>,
+  clip:     <><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9z"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></>,
+  star:     <><polygon points="12 3 14.5 9 21 9.5 16 13.8 17.5 20 12 16.5 6.5 20 8 13.8 3 9.5 9.5 9"/></>,
+  keyboard: <><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></>,
+  users:    <><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M16 5.5a3 3 0 0 1 0 5.5"/><path d="M21 20c0-2.4-1.6-4.2-4-4.8"/></>,
+  grid:     <><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
+  info:     <><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8"/></>,
+  alert:    <><path d="M12 3l9 16H3z"/><line x1="12" y1="10" x2="12" y2="14"/><line x1="12" y1="17" x2="12" y2="17"/></>,
+  apps:     <><circle cx="5" cy="5" r="1.4"/><circle cx="12" cy="5" r="1.4"/><circle cx="19" cy="5" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/><circle cx="5" cy="19" r="1.4"/><circle cx="12" cy="19" r="1.4"/><circle cx="19" cy="19" r="1.4"/></>,
+  search:   <><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></>,
+  filter:   <><polygon points="3 4 21 4 14 12.5 14 19 10 21 10 12.5"/></>,
+  check:    <><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/></>,
+  plus:     <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+  chevL:    <><polyline points="15 6 9 12 15 18"/></>,
+  chevR:    <><polyline points="9 6 15 12 9 18"/></>,
+  cal:      <><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></>,
+  caret:    <><polyline points="6 9 12 15 18 9"/></>
+};
+
+/* ---------- chrome ---------- */
+function Logo() {
+  return (
+    <div style={{
+      width: 34, height: 34, borderRadius: "50%",
+      background: "radial-gradient(circle at 35% 30%, #2b6fc4, #0b3d82)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      boxShadow: "inset 0 0 0 2px #fff, 0 0 0 1.5px #cfd6df", flex: "0 0 auto"
+    }}>
+      <span style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: .5, fontFamily: "'IBM Plex Sans',sans-serif" }}>KST</span>
+    </div>
+  );
+}
+
+function Sidebar() {
+  const items = [I.bank,I.download,I.list,I.truck,I.clip,I.star,I.keyboard,I.users,I.grid,I.star,I.info,I.alert,I.apps];
+  const active = 2;
+  return (
+    <nav style={{
+      width: 58, background: "#fff", borderRight: "1px solid var(--line)",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      paddingTop: 8, gap: 2, flex: "0 0 auto", overflowY: "auto"
+    }}>
+      <button style={sbBtn(false)} title="เมนู"><Icon d={I.menu} size={22}/></button>
+      <div style={{ height: 8 }}/>
+      {items.map((it,i) =>
+        <button key={i} style={sbBtn(i===active)} title="">
+          <Icon d={it} size={21} sw={i===active?2:1.7}/>
+        </button>
+      )}
+    </nav>
+  );
+}
+
+function sbBtn(active) {
+  return {
+    width: 42, height: 42, borderRadius: 10, border: "none",
+    background: active ? "#e8f0fe" : "transparent",
+    color: active ? "var(--blue)" : "#5f6368",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    transition: "background .12s"
+  };
+}
+
+function TopBar({ query, setQuery }) {
+  return (
+    <header style={{
+      height: 60, background: "#fff", borderBottom: "1px solid var(--line)",
+      display: "flex", alignItems: "center", gap: 14, padding: "0 18px",
+      flex: "0 0 auto", zIndex: 20
+    }}>
+      <Logo/>
+      <div style={{ fontWeight: 600, fontSize: 18, color: "var(--ink)", fontFamily: "'IBM Plex Sans',sans-serif", letterSpacing: .2, whiteSpace: "nowrap" }}>
+        KST-RM <span style={{ color: "var(--blue)" }}>UPDATE</span> V2
+      </div>
+      <div style={{ flex: 1, maxWidth: 680, margin: "0 auto", position: "relative" }}>
+        <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: "#80868b", display: "flex" }}>
+          <Icon d={I.search} size={19}/>
+        </span>
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="ค้นหา ชื่อบิล / remark / จังหวัด"
+          style={{
+            width: "100%", height: 42, border: "1px solid transparent",
+            background: "#f1f3f4", borderRadius: 24,
+            padding: "0 18px 0 46px", fontSize: 14.5, color: "var(--ink)", outline: "none"
+          }}
+          onFocus={e => { e.target.style.background="#fff"; e.target.style.borderColor="#dadce0"; e.target.style.boxShadow="0 1px 4px rgba(60,64,67,.16)"; }}
+          onBlur={e  => { e.target.style.background="#f1f3f4"; e.target.style.borderColor="transparent"; e.target.style.boxShadow="none"; }}
+        />
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--faint)", fontSize: 13.5 }}>
+          <span>ซิงค์แล้ว</span>
+          <span style={{
+            width: 16, height: 16, borderRadius: "50%",
+            border: "2px solid #cfd6df", borderTopColor: "var(--blue)",
+            display: "inline-block", animation: "spin 1s linear infinite"
+          }}/>
+        </div>
+        <div style={{
+          width: 34, height: 34, borderRadius: "50%", background: "#7b61ff",
+          color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+          fontWeight: 600, fontSize: 15
+        }}>T</div>
+      </div>
+    </header>
+  );
+}
+
+/* ---------- dots / badges ---------- */
+const typeColor = t => t === "กุ้งเป็น" ? "var(--live)" : "var(--dong)";
+
+function Dot({ color, size=9 }) {
+  return <span style={{ width: size, height: size, borderRadius: "50%", background: color, flex: "0 0 auto", display: "inline-block" }}/>;
+}
+
+function TypeCell({ t, raw }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+      <Dot color={typeColor(t)}/>
+      <span style={{ fontWeight: 500, color: "var(--ink-2)", whiteSpace: "nowrap" }}>{t}</span>
+      {raw && raw !== t &&
+        <span style={{ color: "var(--faint)", fontSize: 12.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {raw.replace("กุ้งเป็น","").replace("กุ้งดอง","").replace("BROKER","").trim()}
+        </span>
+      }
+    </div>
+  );
+}
+
+function SpeciesCell({ sp }) {
+  if (!sp) return <span style={{ color: "#b9bdc2", fontStyle: "italic", fontSize: 13 }}>ไม่ระบุ</span>;
+  const c = sp.includes("ขาว") ? "var(--white-sp)" : sp.includes("ทะเล") ? "var(--sea)" : "var(--black-sp)";
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <Dot color={c}/>
+      <span style={{ color: "var(--ink-2)", whiteSpace: "nowrap", fontFamily: '"IBM Plex Sans"' }}>{sp}</span>
+    </div>
+  );
+}
+
+/* ---------- table grid ---------- */
+const GRID = "132px minmax(190px,1.5fr) 168px 132px 104px 124px 104px";
+
+/* ---------- main ---------- */
+function App() {
+  const [query,    setQuery]   = useState("");
+  const [range,    setRange]   = useState(30);   // days, or 0 = all
+  const [type,     setType]    = useState("all");
+  const [scope,    setScope]   = useState("range"); // 'range' | 'day'
+  const [selDate,  setSelDate] = useState(maxDateStr);
+
+  /* per-date qty for calendar markers + day nav */
+  const dateInfo = useMemo(() => {
+    const m = {};
+    DATA.forEach(r => { m[r.d] = (m[r.d]||0) + r.qty; });
+    return m;
+  }, []);
+
+  const allDatesAsc = useMemo(() => Object.keys(dateInfo).sort(), [dateInfo]);
+  const selectedDay = selDate;
+
+  const prevDate = useMemo(() => {
+    let best = null;
+    for (const d of allDatesAsc) { if (d < selDate) best = d; else break; }
+    return best;
+  }, [allDatesAsc, selDate]);
+
+  const nextDate = useMemo(() => {
+    for (const d of allDatesAsc) { if (d > selDate) return d; }
+    return null;
+  }, [allDatesAsc, selDate]);
+
+  /* filtered records */
+  const filtered = useMemo(() => {
+    let rows = DATA;
+    if (scope === "day") {
+      rows = rows.filter(r => r.d === selectedDay);
+    } else if (range > 0) {
+      const cut = new Date(MAXD);
+      cut.setDate(cut.getDate() - range + 1);
+      const cutStr = `${cut.getFullYear()}-${String(cut.getMonth()+1).padStart(2,"0")}-${String(cut.getDate()).padStart(2,"0")}`;
+      rows = rows.filter(r => r.d >= cutStr);
+    }
+    if (type !== "all") rows = rows.filter(r => r.type === type);
+    const q = query.trim().toLowerCase();
+    if (q) rows = rows.filter(r => (r.bill+" "+r.remark+" "+r.prov+" "+r.species).toLowerCase().includes(q));
+    return rows.slice().sort((a,b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
+  }, [scope, selectedDay, range, type, query]);
+
+  /* group by date */
+  const groups = useMemo(() => {
+    const m = new Map();
+    filtered.forEach(r => { if (!m.has(r.d)) m.set(r.d,[]); m.get(r.d).push(r); });
+    return [...m.entries()].map(([d,rows]) => ({ d, rows, total: rows.reduce((s,r)=>s+r.qty,0) }));
+  }, [filtered]);
+
+  /* stats */
+  const stats = useMemo(() => {
+    const total  = filtered.reduce((s,r)=>s+r.qty,0);
+    const live   = filtered.filter(r=>r.type==="กุ้งเป็น").reduce((s,r)=>s+r.qty,0);
+    const dong   = total - live;
+    const days   = new Set(filtered.map(r=>r.d)).size;
+    const prices = filtered.filter(r=>r.price>0).map(r=>r.price);
+    const avg    = prices.length ? prices.reduce((s,p)=>s+p,0)/prices.length : 0;
+    const pmin   = prices.length ? Math.min(...prices) : 0;
+    const pmax   = prices.length ? Math.max(...prices) : 0;
+    return { total, live, dong, days, count: filtered.length, avg, pmin, pmax };
+  }, [filtered]);
+
+  /* trend bars (up to 30 most-recent days in filtered, chronological) */
+  const trend = useMemo(() => {
+    return groups.map(g => ({
+      d:    g.d,
+      live: g.rows.filter(r=>r.type==="กุ้งเป็น").reduce((s,r)=>s+r.qty,0),
+      dong: g.rows.filter(r=>r.type==="กุ้งดอง").reduce((s,r)=>s+r.qty,0),
+      total: g.total
+    })).slice(0,30).reverse();
+  }, [groups]);
+
+  const trendMax = Math.max(1, ...trend.map(t=>t.total));
+
+  const rangeChips = [
+    { v:7,   l:"7 วัน"  },
+    { v:30,  l:"30 วัน" },
+    { v:90,  l:"90 วัน" },
+    { v:365, l:"1 ปี"   },
+    { v:0,   l:"ทั้งหมด"},
+  ];
+  const typeChips = [
+    { v:"all",      l:"ทั้งหมด", c:null           },
+    { v:"กุ้งเป็น", l:"กุ้งเป็น",c:"var(--live)"  },
+    { v:"กุ้งดอง",  l:"กุ้งดอง", c:"var(--dong)"  },
+  ];
+
+  return (
+    <div style={{ display:"flex", height:"100vh", overflow:"hidden" }}>
+      <Sidebar/>
+      <div style={{ flex:1, display:"flex", flexDirection:"column", minWidth:0 }}>
+        <TopBar query={query} setQuery={setQuery}/>
+        <div style={{ flex:1, overflow:"auto", padding:"22px 26px 60px" }}>
+
+          {/* page header */}
+          <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", gap:16, marginBottom:18, flexWrap:"wrap" }}>
+            <div>
+              <div style={{ fontSize:13, color:"var(--faint)", fontWeight:500, marginBottom:2 }}>KST-RM UPDATE V2 · สรุปรายการ</div>
+              <h1 style={{ margin:0, fontSize:25, fontWeight:600, color:"var(--ink)", letterSpacing:.2 }}>แจ้งวัตถุดิบเข้าประจำวัน</h1>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <button style={btnGhost}><Icon d={I.filter} size={18}/></button>
+              <button style={btnGhost}><Icon d={I.check}  size={18}/></button>
+              <button style={btnPrimary}><Icon d={I.plus} size={18} sw={2.2}/><span>Add</span></button>
+            </div>
+          </div>
+
+          {/* controls */}
+          <div style={{ display:"flex", alignItems:"center", gap:18, flexWrap:"wrap", marginBottom:18 }}>
+            <Segmented
+              options={[{v:"range",l:"ช่วงเวลา"},{v:"day",l:"รายวัน"}]}
+              value={scope} onChange={setScope}
+            />
+            {scope === "range"
+              ? <ChipRow chips={rangeChips} value={range} onChange={setRange}/>
+              : <DayNav
+                  day={selectedDay} dateInfo={dateInfo} onPick={setSelDate}
+                  onPrev={() => prevDate && setSelDate(prevDate)}
+                  onNext={() => nextDate && setSelDate(nextDate)}
+                  prevDisabled={!prevDate} nextDisabled={!nextDate}
+                  latest={maxDateStr}
+                />
+            }
+            <div style={{ width:1, height:24, background:"var(--line)" }}/>
+            <div style={{ display:"flex", gap:6 }}>
+              {typeChips.map(c =>
+                <button key={c.v} onClick={() => setType(c.v)} style={typeChip(type===c.v)}>
+                  {c.c && <Dot color={c.c} size={8}/>}<span>{c.l}</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* summary cards */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:14 }}>
+            <Card label="ปริมาณรวม" sub={`${stats.days} วัน · เฉลี่ย ${nf(stats.days ? stats.total/stats.days : 0)} Kg/วัน`}>
+              <Big v={nf(stats.total)} unit="Kg"/>
+            </Card>
+            <Card label="จำนวนรายการแจ้งเข้า" sub={`ล่าสุด ${fmtDate(groups[0] ? groups[0].d : maxDateStr)}`}>
+              <Big v={nf(stats.count)} unit="รายการ"/>
+            </Card>
+            <Card label="แยกตามประเภท (Kg)">
+              <SplitBar live={stats.live} dong={stats.dong}/>
+            </Card>
+            <Card label="ราคาเฉลี่ย" sub={`ช่วง ฿${nf(stats.pmin)} – ฿${nf(stats.pmax)} /Kg`}>
+              <Big prefix="฿" v={nf(stats.avg)} unit="/Kg"/>
+            </Card>
+          </div>
+
+          {/* trend chart */}
+          <Card label={scope==="day" ? "ปริมาณเข้ารายวัน (30 วันล่าสุดในมุมมอง)" : "ปริมาณเข้าต่อวัน"} pad>
+            <Trend trend={trend} max={trendMax}/>
+          </Card>
+
+          {/* data table */}
+          <div style={{
+            background:"#fff", border:"1px solid var(--line)", borderRadius:12,
+            boxShadow:"var(--shadow)", overflow:"hidden", marginTop:14
+          }}>
+            <div style={{ overflowX:"auto" }}>
+              <div style={{ minWidth:920 }}>
+                {/* column headers */}
+                <div style={{
+                  display:"grid", gridTemplateColumns:GRID, gap:0,
+                  padding:"0 18px", height:46, alignItems:"center",
+                  borderBottom:"1px solid var(--line)",
+                  position:"sticky", top:0, background:"#fff", zIndex:5
+                }}>
+                  {["วันที่","ชื่อเปิดบิล","ประเภท","ชนิดวัตถุดิบ","ขนาด (ตัว/Kg)","ปริมาณ (Kg)","ราคา"].map((h,i) =>
+                    <div key={i} style={{
+                      fontSize:12.5, fontWeight:600, color:"var(--muted)",
+                      textAlign: i>=4 ? "right" : "left",
+                      paddingRight: i>=4 ? 6 : 0, letterSpacing:.2
+                    }}>{h}</div>
+                  )}
+                </div>
+
+                {groups.length === 0 &&
+                  <div style={{ padding:"54px 20px", textAlign:"center", color:"var(--faint)" }}>ไม่พบรายการในช่วงที่เลือก</div>
+                }
+                {groups.map(g => <GroupBlock key={g.d} g={g}/>)}
+              </div>
+            </div>
+
+            {/* table footer */}
+            <div style={{
+              padding:"11px 18px", borderTop:"1px solid var(--line-soft)",
+              color:"var(--faint)", fontSize:13,
+              display:"flex", justifyContent:"space-between"
+            }}>
+              <span>{nf(stats.count)} รายการ · {stats.days} วัน</span>
+              <span>รวม {nf(stats.total)} Kg ({nf1(stats.total/1000)} ตัน)</span>
+            </div>
+          </div>
+
+          {/* footer */}
+          <div style={{ textAlign:"center", color:"#b0b5bb", fontSize:12, marginTop:18, lineHeight:1.7 }}>
+            แหล่งข้อมูล:&nbsp;
+            <a
+              href="https://ksthatyai365-my.sharepoint.com/personal/torsak_ar_kst-hatyai_com/Documents/ADD%20(5).xlsx?web=1"
+              target="_blank" rel="noopener"
+              style={{ color:"var(--blue)", textDecoration:"none" }}
+            >ADD (5).xlsx</a>
+            &nbsp;· ชีต SOURCE · {nf(DATA.length)} รายการทั้งหมด · อัปเดตล่าสุด {fmtDate(maxDateStr)}
+            <br/>
+            <span style={{ display:"inline-flex", alignItems:"center", gap:12, flexWrap:"wrap", justifyContent:"center" }}>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
+                <span style={{ width:9, height:9, borderRadius:"50%", background:"var(--white-sp)" }}/>กุ้งขาว
+              </span>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
+                <span style={{ width:9, height:9, borderRadius:"50%", background:"var(--black-sp)" }}/>กุ้งกุลาดำ
+              </span>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
+                <span style={{ width:9, height:9, borderRadius:"50%", background:"var(--sea)" }}/>กุ้งทะเล
+              </span>
+              <span>· อ่านจากคอลัมน์ S (ชนิดกุ้ง) ในต้นฉบับ</span>
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- group block ---------- */
+function GroupBlock({ g }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div>
+      <div
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display:"flex", alignItems:"center", gap:10,
+          padding:"0 18px", height:40,
+          background:"var(--group)", borderBottom:"1px solid var(--line)",
+          cursor:"pointer", position:"sticky", top:46, zIndex:4
+        }}
+      >
+        <span style={{ display:"flex", color:"#9aa0a6", transform: open?"none":"rotate(-90deg)", transition:"transform .15s" }}>
+          <Icon d={I.caret} size={18}/>
+        </span>
+        <span style={{ fontWeight:600, fontSize:14.5, color:"var(--ink)" }}>{fmtDate(g.d)}</span>
+        <span style={{ fontSize:12.5, color:"var(--faint)" }}>{fmtThaiLong(g.d)}</span>
+        <span style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:8 }}>
+          <span style={{ fontSize:12, color:"var(--faint)" }}>{g.rows.length} รายการ</span>
+          <span style={{
+            background:"#fff", border:"1px solid var(--line)", borderRadius:20,
+            padding:"3px 12px", fontSize:13, fontWeight:600, color:"var(--ink-2)"
+          }}>{nf(g.total)} Kg</span>
+        </span>
+      </div>
+      {open && g.rows.map((r,i) => <Row key={i} r={r}/>)}
+    </div>
+  );
+}
+
+function Row({ r }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display:"grid", gridTemplateColumns:GRID, alignItems:"center",
+        padding:"0 18px", minHeight:50,
+        borderBottom:"1px solid var(--line-soft)",
+        background: hov ? "var(--hover)" : "#fff",
+        transition:"background .1s", fontSize:14
+      }}
+    >
+      <div style={{ color:"var(--muted)", fontSize:13.5, whiteSpace:"nowrap" }}>{fmtDate(r.d)}</div>
+      <div style={{ display:"flex", alignItems:"center", gap:9, minWidth:0, paddingRight:12 }}>
+        <span style={{ width:7, height:7, borderRadius:"50%", background:"#3c4043", flex:"0 0 auto" }}/>
+        <span style={{ whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", color:"var(--ink)", fontWeight:500 }} title={r.bill}>
+          {r.bill||"—"}
+        </span>
+      </div>
+      <div style={{ paddingRight:12, minWidth:0 }}><TypeCell t={r.type} raw={r.rawType}/></div>
+      <div><SpeciesCell sp={r.species}/></div>
+      <div style={{ textAlign:"right", paddingRight:6, color:"var(--ink-2)" }}>{r.size ? nf(r.size) : "—"}</div>
+      <div style={{ textAlign:"right", paddingRight:6, fontWeight:600, color:"var(--ink)" }}>{nf(r.qty)}</div>
+      <div style={{ textAlign:"right", paddingRight:6, color:"var(--ink-2)" }}>
+        {r.price ? <span><span style={{ color:"var(--faint)" }}>฿</span>{nf(r.price)}</span> : "—"}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- widgets ---------- */
+function Card({ label, sub, children, pad }) {
+  return (
+    <div style={{
+      background:"#fff", border:"1px solid var(--line)", borderRadius:12,
+      boxShadow:"var(--shadow)", padding: pad ? "16px 18px 14px" : "15px 17px",
+      animation:"fadeUp .25s ease both"
+    }}>
+      <div style={{ fontSize:12.5, fontWeight:600, color:"var(--muted)", letterSpacing:.2 }}>{label}</div>
+      <div style={{ marginTop: pad ? 10 : 8 }}>{children}</div>
+      {sub && <div style={{ fontSize:12, color:"var(--faint)", marginTop:8 }}>{sub}</div>}
+    </div>
+  );
+}
+
+function Big({ v, unit, prefix }) {
+  return (
+    <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
+      {prefix && <span style={{ fontSize:20, fontWeight:500, color:"var(--faint)" }}>{prefix}</span>}
+      <span style={{ fontSize:28, fontWeight:600, color:"var(--ink)", lineHeight:1, fontFamily:"'IBM Plex Sans',sans-serif" }}>{v}</span>
+      <span style={{ fontSize:13.5, color:"var(--faint)", fontWeight:500 }}>{unit}</span>
+    </div>
+  );
+}
+
+function SplitBar({ live, dong }) {
+  const t = live + dong || 1;
+  const lp = live / t * 100;
+  return (
+    <div>
+      <div style={{ display:"flex", height:30, borderRadius:7, overflow:"hidden", border:"1px solid var(--line-soft)" }}>
+        <div style={{ width:lp+"%", background:"var(--live)", minWidth: live ? 2 : 0 }}/>
+        <div style={{ flex:1, background:"var(--dong)" }}/>
+      </div>
+      <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:12.5 }}>
+        <span style={{ display:"flex", alignItems:"center", gap:6, color:"var(--ink-2)" }}>
+          <Dot color="var(--live)" size={8}/>กุ้งเป็น&nbsp;<b style={{ fontWeight:600 }}>{nf(live)}</b>&nbsp;
+          <span style={{ color:"var(--faint)" }}>({Math.round(lp)}%)</span>
+        </span>
+        <span style={{ display:"flex", alignItems:"center", gap:6, color:"var(--ink-2)" }}>
+          <Dot color="var(--dong)" size={8}/>กุ้งดอง&nbsp;<b style={{ fontWeight:600 }}>{nf(dong)}</b>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Trend({ trend, max }) {
+  if (!trend.length) return <div style={{ color:"var(--faint)", fontSize:13, padding:"10px 0" }}>—</div>;
+  return (
+    <div style={{ display:"flex", alignItems:"flex-end", gap: trend.length>20 ? 3 : 6, height:96 }}>
+      {trend.map((t,i) =>
+        <div key={i} title={`${fmtDate(t.d)} · ${nf(t.total)} Kg`}
+          style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:0, color:"rgb(49,141,219)" }}>
+          <div style={{ width:"100%", maxWidth:26, height:88, display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
+            <div style={{ height: t.live/max*100+"%", background:"var(--live)", borderRadius:"3px 3px 0 0" }}/>
+            <div style={{ height: t.dong/max*100+"%", background:"var(--dong)" }}/>
+          </div>
+          <div style={{ fontSize:9.5, color:"var(--faint)", whiteSpace:"nowrap" }}>{parseD(t.d).getDate()}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Segmented({ options, value, onChange }) {
+  return (
+    <div style={{ display:"flex", background:"#eef0f2", borderRadius:9, padding:3, gap:2 }}>
+      {options.map(o =>
+        <button key={o.v} onClick={() => onChange(o.v)} style={{
+          border:"none", borderRadius:7, padding:"6px 14px", fontSize:13.5, fontWeight:500,
+          background: value===o.v ? "#fff" : "transparent",
+          color:      value===o.v ? "var(--ink)" : "var(--muted)",
+          boxShadow:  value===o.v ? "0 1px 2px rgba(60,64,67,.18)" : "none"
+        }}>{o.l}</button>
+      )}
+    </div>
+  );
+}
+
+function ChipRow({ chips, value, onChange }) {
+  return (
+    <div style={{ display:"flex", gap:6 }}>
+      {chips.map(c =>
+        <button key={c.v} onClick={() => onChange(c.v)} style={typeChip(value===c.v)}>{c.l}</button>
+      )}
+    </div>
+  );
+}
+
+function DayNav({ day, dateInfo, onPick, onPrev, onNext, prevDisabled, nextDisabled, latest }) {
+  const [open, setOpen] = useState(false);
+  const has = dateInfo[day] > 0;
+  return (
+    <div style={{
+      position:"relative", display:"flex", alignItems:"center", gap:4,
+      background:"#fff", border:"1px solid var(--line)", borderRadius:9, padding:"3px 4px"
+    }}>
+      <button onClick={onPrev} disabled={prevDisabled} style={navBtn(prevDisabled)} title="วันก่อนหน้าที่มีข้อมูล">
+        <Icon d={I.chevL} size={18}/>
+      </button>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display:"flex", alignItems:"center", gap:8, minWidth:172, justifyContent:"center",
+          border:"none", background: open ? "#f1f3f4" : "transparent",
+          borderRadius:7, height:30, padding:"0 8px",
+          color:"var(--ink)", fontWeight:600, fontSize:14
+        }}
+      >
+        <Icon d={I.cal} size={16}/>
+        <span>{fmtDate(day)}</span>
+        <span style={{ display:"flex", color:"#9aa0a6", transform: open?"rotate(180deg)":"none", transition:"transform .15s" }}>
+          <Icon d={I.caret} size={15}/>
+        </span>
+      </button>
+      <button onClick={onNext} disabled={nextDisabled} style={navBtn(nextDisabled)} title="วันถัดไปที่มีข้อมูล">
+        <Icon d={I.chevR} size={18}/>
+      </button>
+      {!has && <span style={{ fontSize:11.5, color:"var(--faint)", padding:"0 6px" }}>ไม่มีข้อมูล</span>}
+      {open && <>
+        <div onClick={() => setOpen(false)} style={{ position:"fixed", inset:0, zIndex:40 }}/>
+        <Calendar value={day} dateInfo={dateInfo} latest={latest} onChange={d => { onPick(d); setOpen(false); }}/>
+      </>}
+    </div>
+  );
+}
+
+function Calendar({ value, dateInfo, latest, onChange }) {
+  const sel = parseD(value);
+  const [vm, setVm] = useState({ y: sel.getFullYear(), m: sel.getMonth() });
+  const pad = n => String(n).padStart(2,"0");
+  const startDow = new Date(vm.y, vm.m, 1).getDay();
+  const days     = new Date(vm.y, vm.m+1, 0).getDate();
+  const cells = [];
+  for (let i=0; i<startDow; i++) cells.push(null);
+  for (let d=1; d<=days; d++) cells.push(d);
+  while (cells.length%7 !== 0) cells.push(null);
+  const dow = ["อา","จ","อ","พ","พฤ","ศ","ส"];
+  const stepMonth = delta => setVm(v => {
+    let m=v.m+delta, y=v.y;
+    if (m<0)  { m=11; y--; }
+    if (m>11) { m=0;  y++; }
+    return { y, m };
+  });
+  return (
+    <div style={{
+      position:"absolute", top:"calc(100% + 8px)", left:0, zIndex:50,
+      background:"#fff", border:"1px solid var(--line)", borderRadius:12,
+      boxShadow:"0 8px 28px rgba(60,64,67,.22)", padding:14, width:300,
+      animation:"fadeUp .15s ease both"
+    }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+        <button onClick={() => stepMonth(-1)} style={navBtn(false)}><Icon d={I.chevL} size={18}/></button>
+        <div style={{ fontWeight:600, fontSize:15, color:"var(--ink)" }}>{TH_MONTHS[vm.m]} {vm.y}</div>
+        <button onClick={() => stepMonth(1)}  style={navBtn(false)}><Icon d={I.chevR} size={18}/></button>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2, marginBottom:4 }}>
+        {dow.map((d,i) =>
+          <div key={i} style={{
+            textAlign:"center", fontSize:11.5, fontWeight:600, padding:"2px 0",
+            color: i===0 ? "#d05a5a" : "var(--faint)"
+          }}>{d}</div>
+        )}
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2 }}>
+        {cells.map((d,i) => {
+          if (d===null) return <div key={i}/>;
+          const ds    = `${vm.y}-${pad(vm.m+1)}-${pad(d)}`;
+          const has   = dateInfo[ds] > 0;
+          const isSel = ds === value;
+          const isSun = (startDow+d-1)%7 === 0;
+          return (
+            <button key={i}
+              onClick={() => onChange(ds)}
+              title={has ? `${nf(dateInfo[ds])} Kg` : "ไม่มีข้อมูล"}
+              style={{
+                position:"relative", height:36, border:"none", borderRadius:8,
+                cursor:"pointer", fontSize:13.5,
+                fontWeight:  isSel ? 700 : has ? 600 : 400,
+                background:  isSel ? "var(--blue)" : has ? "#eef4ff" : "transparent",
+                color:       isSel ? "#fff" : has ? "var(--blue-dark)" : isSun ? "#d4a0a0" : "#c0c4c9"
+              }}
+            >
+              {d}
+              {has && !isSel &&
+                <span style={{
+                  position:"absolute", bottom:5, left:"50%", transform:"translateX(-50%)",
+                  width:4, height:4, borderRadius:"50%", background:"var(--blue)"
+                }}/>
+              }
+            </button>
+          );
+        })}
+      </div>
+      <div style={{
+        display:"flex", justifyContent:"space-between", alignItems:"center",
+        marginTop:10, paddingTop:10, borderTop:"1px solid var(--line-soft)"
+      }}>
+        <span style={{ fontSize:11.5, color:"var(--faint)", display:"flex", alignItems:"center", gap:5 }}>
+          <span style={{ width:6, height:6, borderRadius:"50%", background:"var(--blue)" }}/>วันที่มีข้อมูล
+        </span>
+        <button
+          onClick={() => onChange(latest)}
+          style={{ border:"none", background:"#f1f3f4", borderRadius:7, padding:"5px 12px", fontSize:12.5, fontWeight:600, color:"var(--blue-dark)" }}
+        >วันล่าสุด</button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- style helpers ---------- */
+function navBtn(dis) {
+  return {
+    width:30, height:30, border:"none", background:"transparent", borderRadius:7,
+    display:"flex", alignItems:"center", justifyContent:"center",
+    color: dis ? "#c4c8cd" : "var(--muted)"
+  };
+}
+function typeChip(active) {
+  return {
+    display:"flex", alignItems:"center", gap:7,
+    border:"1px solid "+(active ? "var(--blue)" : "var(--line)"),
+    background: active ? "#e8f0fe" : "#fff",
+    color:      active ? "var(--blue-dark)" : "var(--ink-2)",
+    borderRadius:20, padding:"6px 14px", fontSize:13.5, fontWeight:500, transition:"all .12s"
+  };
+}
+const btnGhost = {
+  width:38, height:38, border:"1px solid var(--line)", background:"#fff",
+  borderRadius:9, display:"flex", alignItems:"center", justifyContent:"center", color:"var(--muted)"
+};
+const btnPrimary = {
+  display:"flex", alignItems:"center", gap:6, height:38, padding:"0 16px 0 12px",
+  border:"none", borderRadius:9, background:"var(--blue)", color:"#fff",
+  fontSize:14.5, fontWeight:600, boxShadow:"0 1px 2px rgba(26,115,232,.4)"
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
