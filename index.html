@@ -111,11 +111,27 @@ async function _getToken() {
   if (accounts.length > 0) {
     try {
       const r = await _msalApp.acquireTokenSilent({ scopes: _graphScopes, account: accounts[0] });
+      /* Tenant guard */
+      const tid = accounts[0].tenantId || (accounts[0].idTokenClaims && accounts[0].idTokenClaims.tid);
+      if (tid && tid !== KST_TENANT_ID) {
+        _msalApp.clearCache();
+        throw new Error("ACCESS_DENIED");
+      }
       return r.accessToken;
-    } catch(_) {}
+    } catch(e) { if (e.message === "ACCESS_DENIED") throw e; }
   }
   /* popup login */
-  const r = await _msalApp.loginPopup({ scopes: _graphScopes });
+  const r = await _msalApp.loginPopup({
+    scopes: _graphScopes,
+    domainHint: "kst-hatyai.com",
+    prompt: "select_account"
+  });
+  /* ─── Tenant guard: block non-KST accounts ─── */
+  const tid = r.idTokenClaims && r.idTokenClaims.tid;
+  if (tid && tid !== KST_TENANT_ID) {
+    await _msalApp.logout({ account: r.account });
+    throw new Error("ACCESS_DENIED: บัญชีนี้ไม่ได้อยู่ในองค์กร KST กรุณาใช้อีเมล @kst-hatyai.com เท่านั้น");
+  }
   return r.accessToken;
 }
 
@@ -188,14 +204,17 @@ async function kstFetchData() {
     console.log("[KST] Live load OK:", records.length, "records");
     window.dispatchEvent(new CustomEvent("kst:data-ready", { detail: { count: records.length, live: true } }));
   } catch (err) {
-    console.warn("[KST] Graph fetch failed, using static fallback:", err.message);
+    const accessDenied = err.message && err.message.includes("ACCESS_DENIED");
+    console.warn("[KST] fetch failed:", err.message);
     window.__KST_META = {
-      updatedAt: null,
-      count:     window.RM_DATA.length,
-      loading:   false,
-      error:     err.message
+      updatedAt:    null,
+      count:        accessDenied ? 0 : window.RM_DATA.length,
+      loading:      false,
+      error:        err.message,
+      accessDenied: accessDenied
     };
-    window.dispatchEvent(new CustomEvent("kst:data-ready", { detail: { fallback: true } }));
+    if (accessDenied) window.RM_DATA = [];
+    window.dispatchEvent(new CustomEvent("kst:data-ready", { detail: { fallback: !accessDenied, accessDenied } }));
   }
 }
 
@@ -333,6 +352,8 @@ function SyncBadge() {
         ? <><span style={{ color:"var(--blue)" }}>เชื่อมต่อ OneDrive…</span>
             <span style={{ width:14, height:14, borderRadius:"50%", border:"2px solid #cfd6df", borderTopColor:"var(--blue)", display:"inline-block", animation:"spin 1s linear infinite" }}/>
           </>
+        : meta.accessDenied
+          ? <span style={{ color:"#e8456b", fontWeight:600 }}>⛔ ไม่มีสิทธิ์ — กรุณาใช้อีเมล @kst-hatyai.com</span>
         : error
           ? <><span title={error}>⚠ ใช้ข้อมูลสำรอง</span>
               <button onClick={() => kstFetchData()} style={{ border:"none", background:"var(--blue)", color:"#fff", cursor:"pointer", fontSize:11.5, padding:"3px 9px", borderRadius:6, fontWeight:600 }}>เชื่อมใหม่</button>
