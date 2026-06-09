@@ -81,7 +81,9 @@
 const KST_CLIENT_ID = "2459a57b-bd24-4c19-8f82-1b1d607bd11a";
 const KST_TENANT_ID = "1a4d139b-4e96-4d3b-8cfd-007453cc609e";
 /* OneDrive item path สำหรับ Torsak's personal OneDrive */
-const KST_FILE_PATH = "/me/drive/root:/ADD (5).xlsx:/content";
+/* SharePoint: ksthatyai365.sharepoint.com/sites/KSTRMUPDATEV2 */
+const KST_SHARE_URL  = "https://ksthatyai365.sharepoint.com/:x:/r/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx?d=w1d5a646c5b064cb1923947154a1777b0&csf=1&web=1&e=dveZgy";
+const KST_FILE_PATH  = "/shares/u!" + btoa(KST_SHARE_URL).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"") + "/driveItem/content";
 const KST_SHEET     = "RM RECORD";
 
 window.__KST_LOADED = false;
@@ -93,12 +95,12 @@ const _msalApp = new msal.PublicClientApplication({
   auth: {
     clientId:   KST_CLIENT_ID,
     authority:  "https://login.microsoftonline.com/" + KST_TENANT_ID,
-    redirectUri: window.location.href.split("?")[0].split("#")[0]
+    redirectUri: "https://torsak6589-creator.github.io/KST-RM-UPDATE-V2/"
   },
   cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
 });
 
-const _graphScopes = ["Files.Read", "User.Read"];
+const _graphScopes = ["Files.Read.All", "User.Read"];
 
 /* ─── get token (silent → popup fallback) ─── */
 async function _getToken() {
