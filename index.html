@@ -146,36 +146,55 @@ function _getMsal() {
 const _graphScopes = ["Files.Read.All", "User.Read"];
 
 /* ─── get token (silent → popup fallback) ─── */
-async function _getToken() {
+let __redirectResp = null;
+let __redirectHandled = false;
+async function _initMsalOnce() {
   await _getMsal().initialize();
-  /* handle redirect first */
-  try { await _getMsal().handleRedirectPromise(); } catch(_) {}
+  if (!__redirectHandled) {
+    __redirectHandled = true;
+    try { __redirectResp = await _getMsal().handleRedirectPromise(); } catch(e) { console.warn("[KST] redirect handle:", e.message); }
+  }
+}
+function _tenantGuard(claims, account) {
+  const tid = (claims && claims.tid) || (account && account.tenantId);
+  if (tid && tid !== KST_TENANT_ID) {
+    _getMsal().clearCache();
+    throw new Error("ACCESS_DENIED: บัญชีนี้ไม่ได้อยู่ในองค์กร KST");
+  }
+}
+/* interactive=true → อนุญาตให้ redirect ไปหน้า login Microsoft */
+async function _getToken(interactive) {
+  await _initMsalOnce();
+  /* 1) เพิ่งกลับมาจาก redirect — มี token เลย */
+  if (__redirectResp && __redirectResp.accessToken) {
+    _tenantGuard(__redirectResp.idTokenClaims, __redirectResp.account);
+    const tk = __redirectResp.accessToken;
+    __redirectResp = null;
+    return tk;
+  }
+  /* 2) มี account ใน cache → silent */
   const accounts = _getMsal().getAllAccounts();
   if (accounts.length > 0) {
+    _tenantGuard(accounts[0].idTokenClaims, accounts[0]);
     try {
       const r = await _getMsal().acquireTokenSilent({ scopes: _graphScopes, account: accounts[0] });
-      /* Tenant guard */
-      const tid = accounts[0].tenantId || (accounts[0].idTokenClaims && accounts[0].idTokenClaims.tid);
-      if (tid && tid !== KST_TENANT_ID) {
-        _getMsal().clearCache();
-        throw new Error("ACCESS_DENIED");
-      }
       return r.accessToken;
-    } catch(e) { if (e.message === "ACCESS_DENIED") throw e; }
+    } catch(e) {
+      if (e.message && e.message.includes("ACCESS_DENIED")) throw e;
+      console.warn("[KST] silent fail:", e.message);
+      /* silent fail → ถ้า interactive ให้ redirect, ไม่งั้น throw */
+    }
   }
-  /* popup login */
-  const r = await _getMsal().loginPopup({
-    scopes: _graphScopes,
-    domainHint: "kst-hatyai.com",
-    prompt: "select_account"
-  });
-  /* ─── Tenant guard: block non-KST accounts ─── */
-  const tid = r.idTokenClaims && r.idTokenClaims.tid;
-  if (tid && tid !== KST_TENANT_ID) {
-    await _getMsal().logout({ account: r.account });
-    throw new Error("ACCESS_DENIED: บัญชีนี้ไม่ได้อยู่ในองค์กร KST กรุณาใช้อีเมล @kst-hatyai.com เท่านั้น");
+  /* 3) redirect login (เฉพาะเมื่อ user คลิกปุ่ม) */
+  if (interactive) {
+    await _getMsal().loginRedirect({
+      scopes: _graphScopes,
+      domainHint: "kst-hatyai.com",
+      prompt: "select_account"
+    });
+    throw new Error("REDIRECTING"); /* page กำลังย้าย — ไม่ถึงบรรทัดนี้ */
   }
-  return r.accessToken;
+  throw new Error("NO_SESSION");
 }
 
 /* ─── parse xlsx ArrayBuffer → RM_DATA records ─── */
@@ -223,11 +242,11 @@ function _parseXlsx(buffer) {
 }
 
 /* ─── main fetch flow ─── */
-async function kstFetchData() {
+async function kstFetchData(interactive) {
   window.__KST_META = { ...window.__KST_META, loading: true, error: null };
   window.dispatchEvent(new CustomEvent("kst:sync-state", {}));
   try {
-    const token = await _getToken();
+    const token = await _getToken(interactive);
     /* ลองทุก endpoint ตามลำดับ */
     let buf = null, lastErr = null;
     for (const ep of KST_ENDPOINTS) {
@@ -256,8 +275,10 @@ async function kstFetchData() {
     console.log("[KST] Live load OK:", records.length, "records");
     window.dispatchEvent(new CustomEvent("kst:data-ready", { detail: { count: records.length, live: true } }));
   } catch (err) {
+    if (err.message === "REDIRECTING") return; /* page กำลัง redirect ไป login */
+    const noSession    = err.message === "NO_SESSION";
     const accessDenied = err.message && err.message.includes("ACCESS_DENIED");
-    console.warn("[KST] fetch failed:", err.message);
+    if (!noSession) console.warn("[KST] fetch failed:", err.message);
     window.__KST_META = {
       updatedAt:    null,
       count:        accessDenied ? 0 : window.RM_DATA.length,
@@ -266,7 +287,7 @@ async function kstFetchData() {
       accessDenied: accessDenied
     };
     if (accessDenied) window.RM_DATA = [];
-    window.dispatchEvent(new CustomEvent("kst:data-ready", { detail: { fallback: !accessDenied, accessDenied } }));
+    window.dispatchEvent(new CustomEvent("kst:data-ready", { detail: { fallback: !accessDenied && !noSession, accessDenied, noSession } }));
   }
 }
 
@@ -407,7 +428,7 @@ function SyncBadge() {
           ? <span style={{ color:"#e8456b", fontWeight:600 }}>⛔ ไม่มีสิทธิ์ — กรุณาใช้อีเมล @kst-hatyai.com</span>
         : error
           ? <><span title={error}>⚠ ใช้ข้อมูลสำรอง</span>
-              <button onClick={() => kstFetchData()} style={{ border:"none", background:"var(--blue)", color:"#fff", cursor:"pointer", fontSize:11.5, padding:"3px 9px", borderRadius:6, fontWeight:600 }}>เชื่อมใหม่</button>
+              <button onClick={() => kstFetchData(true)} style={{ border:"none", background:"var(--blue)", color:"#fff", cursor:"pointer", fontSize:11.5, padding:"3px 9px", borderRadius:6, fontWeight:600 }}>เชื่อมใหม่</button>
             </>
           : <><span>{live ? "OneDrive" : "Static"} · {timeStr || "แล้ว"}</span>
               <span style={{ width:8, height:8, borderRadius:"50%", background: live ? "#1e8e5a" : "#f5a623", display:"inline-block" }}/>
@@ -517,8 +538,8 @@ function App() {
     }
     window.addEventListener("kst:data-ready", onReady);
     /* Auto-refresh ทุก 3 นาที + refresh เมื่อกลับมาที่แท็บ */
-    const timer = setInterval(() => kstFetchData(), 3 * 60 * 1000);
-    const onVis = () => { if (document.visibilityState === "visible") kstFetchData(); };
+    const timer = setInterval(() => kstFetchData(false), 3 * 60 * 1000);
+    const onVis = () => { if (document.visibilityState === "visible") kstFetchData(false); };
     document.addEventListener("visibilitychange", onVis);
     return () => { window.removeEventListener("kst:data-ready", onReady); clearInterval(timer); document.removeEventListener("visibilitychange", onVis); };
   }, []);
@@ -1179,17 +1200,17 @@ async function gateSilentTry(){
   try{
     const ok = await _waitMsal(6000);
     if (!ok) { _gateShow("⚠ โหลดไลบรารี Microsoft ไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช"); return; }
-    await _getMsal().initialize();
-    await _getMsal().handleRedirectPromise();
-    var acc=_getMsal().getAllAccounts();
-    if(acc.length>0){
+    await _initMsalOnce();
+    /* กลับมาจาก redirect หรือมี session เดิม → fetch แบบเงียบ */
+    var hasRedirect = !!__redirectResp;
+    var acc = _getMsal().getAllAccounts();
+    if (hasRedirect || acc.length > 0) {
       _gateLoad(true);
-      var tid=acc[0].tenantId||(acc[0].idTokenClaims&&acc[0].idTokenClaims.tid);
-      if(tid&&tid!==KST_TENANT_ID){_getMsal().clearCache();_gateShow('⛔ บัญชีนี้ไม่อยู่ใน KST');return;}
-      await kstFetchData(); return;
+      await kstFetchData(false); /* silent only — ไม่ redirect ซ้ำ */
+      return;
     }
-  }catch(e){}
-  _gateShow();
+  }catch(e){ console.warn("[KST] gateSilentTry:", e.message); }
+  _gateShow(); /* ไม่มี session → ให้ user คลิกปุ่ม login */
 }
 async function gateLogin(){
   document.getElementById('gate-err').textContent='';
@@ -1197,7 +1218,7 @@ async function gateLogin(){
   try{
     const ok = await _waitMsal(6000);
     if (!ok) throw new Error("MSAL_NOT_LOADED");
-    await kstFetchData();
+    await kstFetchData(true); /* interactive — อนุญาต redirect ไป Microsoft login */
   }
   catch(err){
     var m = err.message||'';
@@ -1210,6 +1231,7 @@ async function gateLogin(){
 }
 window.addEventListener('kst:data-ready',function(e){
   if(e.detail&&e.detail.accessDenied) _gateShow('⛔ ไม่มีสิทธิ์ — ใช้บัญชี @kst-hatyai.com');
+  else if(e.detail&&e.detail.noSession) _gateShow();
   else _gateHide();
 });
 gateSilentTry();
