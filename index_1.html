@@ -101,37 +101,46 @@ window.RM_DATA      = [];
 window.__KST_META   = { updatedAt: null, count: 0, loading: true, error: null };
 
 /* ─── MSAL instance ─── */
-const _msalApp = new msal.PublicClientApplication({
-  auth: {
-    clientId:   KST_CLIENT_ID,
-    authority:  "https://login.microsoftonline.com/" + KST_TENANT_ID,
-    redirectUri: "https://torsak6589-creator.github.io/KST-RM-UPDATE-V2/"
-  },
-  cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
-});
+/* lazy MSAL init — กัน "msal is not defined" ถ้า CDN ยังโหลดไม่เสร็จ/ถูกบล็อก */
+let __msalInstance = null;
+function _getMsal() {
+  if (__msalInstance) return __msalInstance;
+  if (typeof msal === "undefined") {
+    throw new Error("MSAL_NOT_LOADED: ไลบรารี Microsoft ยังโหลดไม่เสร็จ กรุณารอสักครู่แล้วลองใหม่");
+  }
+  __msalInstance = new msal.PublicClientApplication({
+    auth: {
+      clientId:   KST_CLIENT_ID,
+      authority:  "https://login.microsoftonline.com/" + KST_TENANT_ID,
+      redirectUri: "https://torsak6589-creator.github.io/KST-RM-UPDATE-V2/"
+    },
+    cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
+  });
+  return __msalInstance;
+}
 
 const _graphScopes = ["Files.Read.All", "User.Read"];
 
 /* ─── get token (silent → popup fallback) ─── */
 async function _getToken() {
-  await _msalApp.initialize();
+  await _getMsal().initialize();
   /* handle redirect first */
-  try { await _msalApp.handleRedirectPromise(); } catch(_) {}
-  const accounts = _msalApp.getAllAccounts();
+  try { await _getMsal().handleRedirectPromise(); } catch(_) {}
+  const accounts = _getMsal().getAllAccounts();
   if (accounts.length > 0) {
     try {
-      const r = await _msalApp.acquireTokenSilent({ scopes: _graphScopes, account: accounts[0] });
+      const r = await _getMsal().acquireTokenSilent({ scopes: _graphScopes, account: accounts[0] });
       /* Tenant guard */
       const tid = accounts[0].tenantId || (accounts[0].idTokenClaims && accounts[0].idTokenClaims.tid);
       if (tid && tid !== KST_TENANT_ID) {
-        _msalApp.clearCache();
+        _getMsal().clearCache();
         throw new Error("ACCESS_DENIED");
       }
       return r.accessToken;
     } catch(e) { if (e.message === "ACCESS_DENIED") throw e; }
   }
   /* popup login */
-  const r = await _msalApp.loginPopup({
+  const r = await _getMsal().loginPopup({
     scopes: _graphScopes,
     domainHint: "kst-hatyai.com",
     prompt: "select_account"
@@ -139,7 +148,7 @@ async function _getToken() {
   /* ─── Tenant guard: block non-KST accounts ─── */
   const tid = r.idTokenClaims && r.idTokenClaims.tid;
   if (tid && tid !== KST_TENANT_ID) {
-    await _msalApp.logout({ account: r.account });
+    await _getMsal().logout({ account: r.account });
     throw new Error("ACCESS_DENIED: บัญชีนี้ไม่ได้อยู่ในองค์กร KST กรุณาใช้อีเมล @kst-hatyai.com เท่านั้น");
   }
   return r.accessToken;
@@ -1123,15 +1132,25 @@ function _gateShow(msg){
   _gateLoad(false);
 }
 function _gateHide(){var g=document.getElementById('kst-gate');if(g)g.classList.add('hidden');}
+async function _waitMsal(maxMs){
+  const t0 = Date.now();
+  while (typeof msal === "undefined") {
+    if (Date.now() - t0 > (maxMs||6000)) return false;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  return true;
+}
 async function gateSilentTry(){
   try{
-    await _msalApp.initialize();
-    await _msalApp.handleRedirectPromise();
-    var acc=_msalApp.getAllAccounts();
+    const ok = await _waitMsal(6000);
+    if (!ok) { _gateShow("⚠ โหลดไลบรารี Microsoft ไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช"); return; }
+    await _getMsal().initialize();
+    await _getMsal().handleRedirectPromise();
+    var acc=_getMsal().getAllAccounts();
     if(acc.length>0){
       _gateLoad(true);
       var tid=acc[0].tenantId||(acc[0].idTokenClaims&&acc[0].idTokenClaims.tid);
-      if(tid&&tid!==KST_TENANT_ID){_msalApp.clearCache();_gateShow('⛔ บัญชีนี้ไม่อยู่ใน KST');return;}
+      if(tid&&tid!==KST_TENANT_ID){_getMsal().clearCache();_gateShow('⛔ บัญชีนี้ไม่อยู่ใน KST');return;}
       await kstFetchData(); return;
     }
   }catch(e){}
@@ -1140,8 +1159,19 @@ async function gateSilentTry(){
 async function gateLogin(){
   document.getElementById('gate-err').textContent='';
   _gateLoad(true);
-  try{ await kstFetchData(); }
-  catch(err){ _gateShow(err.message&&err.message.includes('ACCESS_DENIED')?'⛔ ไม่มีสิทธิ์ — ใช้บัญชี @kst-hatyai.com':'⚠ เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่'); }
+  try{
+    const ok = await _waitMsal(6000);
+    if (!ok) throw new Error("MSAL_NOT_LOADED");
+    await kstFetchData();
+  }
+  catch(err){
+    var m = err.message||'';
+    _gateShow(
+      m.includes('ACCESS_DENIED') ? '⛔ ไม่มีสิทธิ์ — ใช้บัญชี @kst-hatyai.com'
+      : m.includes('MSAL_NOT_LOADED') ? '⚠ โหลดไลบรารี Microsoft ไม่สำเร็จ — รีเฟรชหน้าแล้วลองใหม่'
+      : '⚠ เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่'
+    );
+  }
 }
 window.addEventListener('kst:data-ready',function(e){
   if(e.detail&&e.detail.accessDenied) _gateShow('⛔ ไม่มีสิทธิ์ — ใช้บัญชี @kst-hatyai.com');
