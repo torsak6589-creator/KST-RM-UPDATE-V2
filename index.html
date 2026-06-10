@@ -117,7 +117,7 @@ const KST_ENDPOINTS = [
   /* 2: SharePoint clean URL */
   "/shares/" + _shareEnc(KST_SHARE_CLEAN) + "/driveItem/content",
   /* 3: SharePoint site path */
-  "/sites/ksthatyai365.sharepoint.com:/sites/KSTRMUPDATEV2:/drive/root:/ADD (5).xlsx:/content",
+  "/sites/ksthatyai365.sharepoint.com:/sites/KSTRMUPDATEV2:/drive/root:/ADD%20(5).xlsx:/content",
 ];
 const KST_SHEET     = "RM RECORD";
 
@@ -248,21 +248,29 @@ async function kstFetchData(interactive) {
   window.dispatchEvent(new CustomEvent("kst:sync-state", {}));
   try {
     const token = await _getToken(interactive);
-    /* ลองทุก endpoint ตามลำดับ */
-    let buf = null, lastErr = null;
-    for (const ep of KST_ENDPOINTS) {
+    /* ลองทุก endpoint ตามลำดับ — เก็บ error ทุกตัว */
+    let buf = null;
+    const errs = [];
+    for (let i = 0; i < KST_ENDPOINTS.length; i++) {
+      const ep = KST_ENDPOINTS[i];
       try {
         const res = await fetch(
           "https://graph.microsoft.com/v1.0" + ep,
           { headers: { Authorization: "Bearer " + token } }
         );
-        if (!res.ok) { lastErr = "HTTP " + res.status + " @ " + ep.slice(0, 40); console.warn("[KST] endpoint fail:", res.status, ep.slice(0, 70)); continue; }
+        if (!res.ok) {
+          let detail = "";
+          try { const j = await res.json(); detail = (j.error && j.error.code) || ""; } catch(_) {}
+          errs.push("EP" + (i+1) + ": HTTP " + res.status + (detail ? " (" + detail + ")" : ""));
+          console.warn("[KST] EP" + (i+1) + " fail:", res.status, detail, ep.slice(0, 70));
+          continue;
+        }
         buf = await res.arrayBuffer();
-        console.log("[KST] endpoint OK:", ep.slice(0, 60));
+        console.log("[KST] EP" + (i+1) + " OK:", ep.slice(0, 60));
         break;
-      } catch (e) { lastErr = e.message; }
+      } catch (e) { errs.push("EP" + (i+1) + ": " + e.message); }
     }
-    if (!buf) throw new Error("ทุก endpoint ล้มเหลว: " + lastErr);
+    if (!buf) throw new Error("ทุก endpoint ล้มเหลว —\n" + errs.join("\n"));
     const records = _parseXlsx(buf);
     window.RM_DATA    = records;
     window.__KST_META = {
