@@ -106,8 +106,18 @@ const KST_CLIENT_ID = "2459a57b-bd24-4c19-8f82-1b1d607bd11a";
 const KST_TENANT_ID = "1a4d139b-4e96-4d3b-8cfd-007453cc609e";
 /* OneDrive item path สำหรับ Torsak's personal OneDrive */
 /* SharePoint: ksthatyai365.sharepoint.com/sites/KSTRMUPDATEV2 */
-const KST_SHARE_URL  = "https://ksthatyai365.sharepoint.com/:x:/r/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx?d=w1d5a646c5b064cb1923947154a1777b0&csf=1&web=1&e=dveZgy";
-const KST_FILE_PATH  = "/shares/u!" + btoa(KST_SHARE_URL).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"") + "/driveItem/content";
+/* ─── หลาย endpoint — ลองตามลำดับจนกว่าจะสำเร็จ ─── */
+function _shareEnc(u) { return "u!" + btoa(u).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,""); }
+const KST_SHARE_FULL  = "https://ksthatyai365.sharepoint.com/:x:/r/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx?d=w1d5a646c5b064cb1923947154a1777b0&csf=1&web=1&e=dveZgy";
+const KST_SHARE_CLEAN = "https://ksthatyai365.sharepoint.com/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx";
+const KST_ENDPOINTS = [
+  /* 1: share link เต็ม */
+  "/shares/" + _shareEnc(KST_SHARE_FULL) + "/driveItem/content",
+  /* 2: share link แบบ clean (ไม่มี query) */
+  "/shares/" + _shareEnc(KST_SHARE_CLEAN) + "/driveItem/content",
+  /* 3: site path โดยตรง */
+  "/sites/ksthatyai365.sharepoint.com:/sites/KSTRMUPDATEV2:/drive/root:/ADD (5).xlsx:/content",
+];
 const KST_SHEET     = "RM RECORD";
 
 window.__KST_LOADED = false;
@@ -218,12 +228,21 @@ async function kstFetchData() {
   window.dispatchEvent(new CustomEvent("kst:sync-state", {}));
   try {
     const token = await _getToken();
-    const res   = await fetch(
-      "https://graph.microsoft.com/v1.0" + KST_FILE_PATH,
-      { headers: { Authorization: "Bearer " + token } }
-    );
-    if (!res.ok) throw new Error("Graph HTTP " + res.status);
-    const buf     = await res.arrayBuffer();
+    /* ลองทุก endpoint ตามลำดับ */
+    let buf = null, lastErr = null;
+    for (const ep of KST_ENDPOINTS) {
+      try {
+        const res = await fetch(
+          "https://graph.microsoft.com/v1.0" + ep,
+          { headers: { Authorization: "Bearer " + token } }
+        );
+        if (!res.ok) { lastErr = "HTTP " + res.status + " @ " + ep.slice(0, 40); continue; }
+        buf = await res.arrayBuffer();
+        console.log("[KST] endpoint OK:", ep.slice(0, 60));
+        break;
+      } catch (e) { lastErr = e.message; }
+    }
+    if (!buf) throw new Error("ทุก endpoint ล้มเหลว: " + lastErr);
     const records = _parseXlsx(buf);
     window.RM_DATA    = records;
     window.__KST_META = {
@@ -497,9 +516,11 @@ function App() {
       setSyncState(window.__KST_META || {});
     }
     window.addEventListener("kst:data-ready", onReady);
-    /* Auto-refresh ทุก 10 นาที */
-    const timer = setInterval(() => kstFetchData(), 10 * 60 * 1000);
-    return () => { window.removeEventListener("kst:data-ready", onReady); clearInterval(timer); };
+    /* Auto-refresh ทุก 3 นาที + refresh เมื่อกลับมาที่แท็บ */
+    const timer = setInterval(() => kstFetchData(), 3 * 60 * 1000);
+    const onVis = () => { if (document.visibilityState === "visible") kstFetchData(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { window.removeEventListener("kst:data-ready", onReady); clearInterval(timer); document.removeEventListener("visibilitychange", onVis); };
   }, []);
 
   /* per-date qty for calendar markers + day nav */
