@@ -608,8 +608,12 @@ function App() {
     const live   = filtered.filter(r=>r.type==="กุ้งเป็น").reduce((s,r)=>s+r.qty,0);
     const dong   = total - live;
     const days   = new Set(filtered.map(r=>r.d)).size;
-    const prices = filtered.filter(r=>r.price>0).map(r=>r.price);
-    const avg    = prices.length ? prices.reduce((s,p)=>s+p,0)/prices.length : 0;
+    /* ราคาเฉลี่ยถ่วงน้ำหนัก: Σ(ราคา × kg) ÷ Σ(kg) เฉพาะรายการที่มีราคา */
+    const priced = filtered.filter(r => r.price > 0 && r.qty > 0);
+    const wSum   = priced.reduce((s,r) => s + r.price * r.qty, 0);
+    const wQty   = priced.reduce((s,r) => s + r.qty, 0);
+    const avg    = wQty > 0 ? wSum / wQty : 0;
+    const prices = priced.map(r => r.price);
     const pmin   = prices.length ? Math.min(...prices) : 0;
     const pmax   = prices.length ? Math.max(...prices) : 0;
     return { total, live, dong, days, count: filtered.length, avg, pmin, pmax };
