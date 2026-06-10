@@ -616,7 +616,14 @@ function App() {
     const prices = priced.map(r => r.price);
     const pmin   = prices.length ? Math.min(...prices) : 0;
     const pmax   = prices.length ? Math.max(...prices) : 0;
-    return { total, live, dong, days, count: filtered.length, avg, pmin, pmax };
+    /* ขนาดเฉลี่ยถ่วงน้ำหนัก: Σ(ขนาด × kg) ÷ Σ(kg) เฉพาะรายการที่มีขนาด */
+    const sized  = filtered.filter(r => r.size > 0 && r.qty > 0);
+    const szQty  = sized.reduce((s,r) => s + r.qty, 0);
+    const szAvg  = szQty > 0 ? sized.reduce((s,r) => s + r.size * r.qty, 0) / szQty : 0;
+    const sizes  = sized.map(r => r.size);
+    const szMin  = sizes.length ? Math.min(...sizes) : 0;
+    const szMax  = sizes.length ? Math.max(...sizes) : 0;
+    return { total, live, dong, days, count: filtered.length, avg, pmin, pmax, szAvg, szMin, szMax };
   }, [filtered]);
 
   /* trend bars (up to 30 most-recent days in filtered, chronological) */
@@ -693,7 +700,7 @@ function App() {
           </div>
 
           {/* summary cards */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:14 }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:14, marginBottom:14 }}>
             <Card label="ปริมาณรวม" sub={`${stats.days} วัน · เฉลี่ย ${nf(stats.days ? stats.total/stats.days : 0)} Kg/วัน`}>
               <Big v={nf(stats.total)} unit="Kg"/>
             </Card>
@@ -702,6 +709,9 @@ function App() {
             </Card>
             <Card label="แยกตามประเภท (Kg)">
               <SplitBar live={stats.live} dong={stats.dong}/>
+            </Card>
+            <Card label="ขนาดเฉลี่ย" sub={`ช่วง ${nf(stats.szMin)} – ${nf(stats.szMax)} ตัว/Kg`}>
+              <Big v={nf(stats.szAvg)} unit="ตัว/Kg"/>
             </Card>
             <Card label="ราคาเฉลี่ย" sub={`ช่วง ฿${nf(stats.pmin)} – ฿${nf(stats.pmax)} /Kg`}>
               <Big prefix="฿" v={nf(stats.avg)} unit="/Kg"/>
