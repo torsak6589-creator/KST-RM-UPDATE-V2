@@ -108,9 +108,9 @@ const KST_TENANT_ID = "1a4d139b-4e96-4d3b-8cfd-007453cc609e";
 /* SharePoint: ksthatyai365.sharepoint.com/sites/KSTRMUPDATEV2 */
 /* ─── หลาย endpoint — ลองตามลำดับจนกว่าจะสำเร็จ ─── */
 function _shareEnc(u) { return "u!" + btoa(u).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,""); }
-const KST_SHARE_FULL  = "https://ksthatyai365.sharepoint.com/:x:/r/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx?d=w1d5a646c5b064cb1923947154a1777b0&csf=1&web=1&e=dveZgy";
+/* ไฟล์หลัก: SharePoint site KSTRMUPDATEV2 เท่านั้น (ห้ามใช้ OneDrive — คนละไฟล์) */
+const KST_SHARE_FULL  = "https://ksthatyai365.sharepoint.com/:x:/r/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx?d=w1d5a646c5b064cb1923947154a1777b0&csf=1&web=1&e=hpRB8k";
 const KST_SHARE_CLEAN = "https://ksthatyai365.sharepoint.com/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx";
-const KST_ONEDRIVE_URL = "https://ksthatyai365-my.sharepoint.com/personal/torsak_ar_kst-hatyai_com/Documents/ADD%20(5).xlsx";
 const KST_ENDPOINTS = [
   /* 1: SharePoint share link เต็ม */
   "/shares/" + _shareEnc(KST_SHARE_FULL) + "/driveItem/content",
@@ -118,10 +118,6 @@ const KST_ENDPOINTS = [
   "/shares/" + _shareEnc(KST_SHARE_CLEAN) + "/driveItem/content",
   /* 3: SharePoint site path */
   "/sites/ksthatyai365.sharepoint.com:/sites/KSTRMUPDATEV2:/drive/root:/ADD (5).xlsx:/content",
-  /* 4: OneDrive ส่วนตัว (share link) — ใช้ได้กับ Files.Read */
-  "/shares/" + _shareEnc(KST_ONEDRIVE_URL) + "/driveItem/content",
-  /* 5: OneDrive ของผู้ login เอง (เฉพาะ Torsak) */
-  "/me/drive/root:/ADD (5).xlsx:/content",
 ];
 const KST_SHEET     = "RM RECORD";
 
@@ -432,7 +428,7 @@ function SyncBadge() {
         : meta.accessDenied
           ? <span style={{ color:"#e8456b", fontWeight:600 }}>⛔ ไม่มีสิทธิ์ — กรุณาใช้อีเมล @kst-hatyai.com</span>
         : error
-          ? <><span title={error}>⚠ ใช้ข้อมูลสำรอง</span>
+          ? <><span title={error} style={{cursor:"help"}} onClick={() => alert("รายละเอียด:\n" + error)}>⚠ ใช้ข้อมูลสำรอง (กดดูสาเหตุ)</span>
               <button onClick={() => kstFetchData(true)} style={{ border:"none", background:"var(--blue)", color:"#fff", cursor:"pointer", fontSize:11.5, padding:"3px 9px", borderRadius:6, fontWeight:600 }}>เชื่อมใหม่</button>
             </>
           : <><span>{live ? "OneDrive" : "Static"} · {timeStr || "แล้ว"}</span>
