@@ -110,13 +110,18 @@ const KST_TENANT_ID = "1a4d139b-4e96-4d3b-8cfd-007453cc609e";
 function _shareEnc(u) { return "u!" + btoa(u).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,""); }
 const KST_SHARE_FULL  = "https://ksthatyai365.sharepoint.com/:x:/r/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx?d=w1d5a646c5b064cb1923947154a1777b0&csf=1&web=1&e=dveZgy";
 const KST_SHARE_CLEAN = "https://ksthatyai365.sharepoint.com/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx";
+const KST_ONEDRIVE_URL = "https://ksthatyai365-my.sharepoint.com/personal/torsak_ar_kst-hatyai_com/Documents/ADD%20(5).xlsx";
 const KST_ENDPOINTS = [
-  /* 1: share link เต็ม */
+  /* 1: SharePoint share link เต็ม */
   "/shares/" + _shareEnc(KST_SHARE_FULL) + "/driveItem/content",
-  /* 2: share link แบบ clean (ไม่มี query) */
+  /* 2: SharePoint clean URL */
   "/shares/" + _shareEnc(KST_SHARE_CLEAN) + "/driveItem/content",
-  /* 3: site path โดยตรง */
+  /* 3: SharePoint site path */
   "/sites/ksthatyai365.sharepoint.com:/sites/KSTRMUPDATEV2:/drive/root:/ADD (5).xlsx:/content",
+  /* 4: OneDrive ส่วนตัว (share link) — ใช้ได้กับ Files.Read */
+  "/shares/" + _shareEnc(KST_ONEDRIVE_URL) + "/driveItem/content",
+  /* 5: OneDrive ของผู้ login เอง (เฉพาะ Torsak) */
+  "/me/drive/root:/ADD (5).xlsx:/content",
 ];
 const KST_SHEET     = "RM RECORD";
 
@@ -255,7 +260,7 @@ async function kstFetchData(interactive) {
           "https://graph.microsoft.com/v1.0" + ep,
           { headers: { Authorization: "Bearer " + token } }
         );
-        if (!res.ok) { lastErr = "HTTP " + res.status + " @ " + ep.slice(0, 40); continue; }
+        if (!res.ok) { lastErr = "HTTP " + res.status + " @ " + ep.slice(0, 40); console.warn("[KST] endpoint fail:", res.status, ep.slice(0, 70)); continue; }
         buf = await res.arrayBuffer();
         console.log("[KST] endpoint OK:", ep.slice(0, 60));
         break;
