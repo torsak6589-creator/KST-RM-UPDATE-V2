@@ -108,16 +108,16 @@ const KST_TENANT_ID = "1a4d139b-4e96-4d3b-8cfd-007453cc609e";
 /* SharePoint: ksthatyai365.sharepoint.com/sites/KSTRMUPDATEV2 */
 /* ─── หลาย endpoint — ลองตามลำดับจนกว่าจะสำเร็จ ─── */
 function _shareEnc(u) { return "u!" + btoa(u).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,""); }
-/* ไฟล์หลัก: SharePoint site KSTRMUPDATEV2 เท่านั้น (ห้ามใช้ OneDrive — คนละไฟล์) */
-const KST_SHARE_FULL  = "https://ksthatyai365.sharepoint.com/:x:/r/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx?d=w1d5a646c5b064cb1923947154a1777b0&csf=1&web=1&e=hpRB8k";
-const KST_SHARE_CLEAN = "https://ksthatyai365.sharepoint.com/sites/KSTRMUPDATEV2/Shared%20Documents/ADD%20(5).xlsx";
+/* ─── แหล่งข้อมูลเดียวกับ KST Procurement Dashboard v17 ───
+   ADD (5).xlsx ใน SharePoint site KSTRMUPDATEV2 (drive+item id ตรงตัว) */
+const KST_DRIVE_ID = "b!D6giGoE1uESBO7PRA7RLxFqpAw5iWfRFiv_0gjMFy8izTfh03nDXRLiLCyyr3IrK";
+const KST_FILE_ID  = "014NXMQUBKW4HOOOFMRZBZIRWCDX6AHTJV";
+const KST_SHARE_TOKEN = "u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUuc2hhcmVwb2ludC5jb20vOng6L3MvS1NUUk1VUERBVEVWMi9JUUJzWkZvZEJsdXhUSkk1UnhWS0YzZXdBWFlydUttMjZ3WlF0d0IzaTFPWGRpND9lPTB2UEx3Ug";
 const KST_ENDPOINTS = [
-  /* 1: SharePoint share link เต็ม */
-  "/shares/" + _shareEnc(KST_SHARE_FULL) + "/driveItem/content",
-  /* 2: SharePoint clean URL */
-  "/shares/" + _shareEnc(KST_SHARE_CLEAN) + "/driveItem/content",
-  /* 3: SharePoint site path */
-  "/sites/ksthatyai365.sharepoint.com:/sites/KSTRMUPDATEV2:/drive/root:/ADD%20(5).xlsx:/content",
+  /* 1: drive + item id โดยตรง (แบบเดียวกับ v17) */
+  "/drives/" + KST_DRIVE_ID + "/items/" + KST_FILE_ID + "/content",
+  /* 2: sharing token (fallback ของ v17) */
+  "/shares/" + KST_SHARE_TOKEN + "/driveItem/content",
 ];
 const KST_SHEET     = "RM RECORD";
 
