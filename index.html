@@ -558,7 +558,7 @@ function App() {
     const m = {};
     rmData.forEach(r => { m[r.d] = (m[r.d]||0) + r.qty; });
     return m;
-  }, []);
+  }, [rmData]);
 
   const allDatesAsc = useMemo(() => Object.keys(dateInfo).sort(), [dateInfo]);
   const selectedDay = selDate;
@@ -591,7 +591,7 @@ function App() {
     const q = query.trim().toLowerCase();
     if (q) rows = rows.filter(r => (r.bill+" "+r.remark+" "+r.prov+" "+r.species).toLowerCase().includes(q));
     return rows.slice().sort((a,b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
-  }, [scope, selectedDay, range, type, query]);
+  }, [rmData, scope, selectedDay, selMonth, range, type, query]);
 
   /* group by date (or week within month) */
   const groups = useMemo(() => {
