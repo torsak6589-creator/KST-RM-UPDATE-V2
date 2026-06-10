@@ -61,6 +61,19 @@
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: none; }
   }
+
+/* ── Login Gate ── */
+#kst-gate{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0A0E1A,#0d1f3c);display:flex;align-items:center;justify-content:center;font-family:'Noto Sans Thai',sans-serif;}
+#kst-gate.hidden{display:none!important;}
+.gate-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:48px 52px;text-align:center;max-width:400px;width:90%;backdrop-filter:blur(12px);box-shadow:0 24px 64px rgba(0,0,0,.6);}
+.gate-logo{height:60px;margin-bottom:22px;}
+.gate-title{color:#fff;font-size:21px;font-weight:700;margin-bottom:6px;}
+.gate-sub{color:rgba(255,255,255,.45);font-size:13.5px;margin-bottom:30px;line-height:1.7;}
+.gate-btn{background:linear-gradient(135deg,#C8982A,#e0b84a);color:#0A0E1A;border:none;border-radius:12px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:opacity .2s;font-family:'Noto Sans Thai',sans-serif;}
+.gate-btn:hover{opacity:.88;}
+.gate-btn:disabled{opacity:.45;cursor:not-allowed;}
+.gate-spinner{width:22px;height:22px;border-radius:50%;border:3px solid rgba(200,152,42,.25);border-top-color:#C8982A;animation:spin 1s linear infinite;margin:0 auto 18px;}
+.gate-err{color:#ff6b8a;font-size:13px;margin-top:16px;line-height:1.6;min-height:20px;}
 </style>
 </head>
 <body>
@@ -79,7 +92,8 @@
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <!-- MSAL 2 (PKCE) -->
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"
+  onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js';document.head.appendChild(s);"></script>
 <!-- SheetJS (xlsx parser) -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
@@ -101,37 +115,46 @@ window.RM_DATA      = [];
 window.__KST_META   = { updatedAt: null, count: 0, loading: true, error: null };
 
 /* ─── MSAL instance ─── */
-const _msalApp = new msal.PublicClientApplication({
-  auth: {
-    clientId:   KST_CLIENT_ID,
-    authority:  "https://login.microsoftonline.com/" + KST_TENANT_ID,
-    redirectUri: "https://torsak6589-creator.github.io/KST-RM-UPDATE-V2/"
-  },
-  cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
-});
+/* lazy MSAL init — กัน "msal is not defined" ถ้า CDN ยังโหลดไม่เสร็จ/ถูกบล็อก */
+let __msalInstance = null;
+function _getMsal() {
+  if (__msalInstance) return __msalInstance;
+  if (typeof msal === "undefined") {
+    throw new Error("MSAL_NOT_LOADED: ไลบรารี Microsoft ยังโหลดไม่เสร็จ กรุณารอสักครู่แล้วลองใหม่");
+  }
+  __msalInstance = new msal.PublicClientApplication({
+    auth: {
+      clientId:   KST_CLIENT_ID,
+      authority:  "https://login.microsoftonline.com/" + KST_TENANT_ID,
+      redirectUri: "https://torsak6589-creator.github.io/KST-RM-UPDATE-V2/"
+    },
+    cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
+  });
+  return __msalInstance;
+}
 
 const _graphScopes = ["Files.Read.All", "User.Read"];
 
 /* ─── get token (silent → popup fallback) ─── */
 async function _getToken() {
-  await _msalApp.initialize();
+  await _getMsal().initialize();
   /* handle redirect first */
-  try { await _msalApp.handleRedirectPromise(); } catch(_) {}
-  const accounts = _msalApp.getAllAccounts();
+  try { await _getMsal().handleRedirectPromise(); } catch(_) {}
+  const accounts = _getMsal().getAllAccounts();
   if (accounts.length > 0) {
     try {
-      const r = await _msalApp.acquireTokenSilent({ scopes: _graphScopes, account: accounts[0] });
+      const r = await _getMsal().acquireTokenSilent({ scopes: _graphScopes, account: accounts[0] });
       /* Tenant guard */
       const tid = accounts[0].tenantId || (accounts[0].idTokenClaims && accounts[0].idTokenClaims.tid);
       if (tid && tid !== KST_TENANT_ID) {
-        _msalApp.clearCache();
+        _getMsal().clearCache();
         throw new Error("ACCESS_DENIED");
       }
       return r.accessToken;
     } catch(e) { if (e.message === "ACCESS_DENIED") throw e; }
   }
   /* popup login */
-  const r = await _msalApp.loginPopup({
+  const r = await _getMsal().loginPopup({
     scopes: _graphScopes,
     domainHint: "kst-hatyai.com",
     prompt: "select_account"
@@ -139,7 +162,7 @@ async function _getToken() {
   /* ─── Tenant guard: block non-KST accounts ─── */
   const tid = r.idTokenClaims && r.idTokenClaims.tid;
   if (tid && tid !== KST_TENANT_ID) {
-    await _msalApp.logout({ account: r.account });
+    await _getMsal().logout({ account: r.account });
     throw new Error("ACCESS_DENIED: บัญชีนี้ไม่ได้อยู่ในองค์กร KST กรุณาใช้อีเมล @kst-hatyai.com เท่านั้น");
   }
   return r.accessToken;
@@ -459,6 +482,7 @@ function App() {
   const [rmData,   setRmData]  = useState(_DATA);
   const [syncState,setSyncState] = useState(window.__KST_META || { loading: true, updatedAt: null, error: null });
   const [selDate,  setSelDate] = useState(maxDateStr);
+  const [selMonth, setSelMonth] = useState(() => maxDateStr.slice(0,7)); /* YYYY-MM */
 
   /* Listen for live data from OneDrive/Graph */
   useEffect(() => {
@@ -504,6 +528,8 @@ function App() {
     let rows = rmData;
     if (scope === "day") {
       rows = rows.filter(r => r.d === selectedDay);
+    } else if (scope === "month") {
+      rows = rows.filter(r => r.d.slice(0,7) === selMonth);
     } else if (range > 0) {
       const cut = new Date(MAXD);
       cut.setDate(cut.getDate() - range + 1);
@@ -516,11 +542,13 @@ function App() {
     return rows.slice().sort((a,b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
   }, [scope, selectedDay, range, type, query]);
 
-  /* group by date */
+  /* group by date (or week within month) */
   const groups = useMemo(() => {
     const m = new Map();
     filtered.forEach(r => { if (!m.has(r.d)) m.set(r.d,[]); m.get(r.d).push(r); });
-    return [...m.entries()].map(([d,rows]) => ({ d, rows, total: rows.reduce((s,r)=>s+r.qty,0) }));
+    return [...m.entries()]
+      .sort((a,b) => b[0].localeCompare(a[0]))
+      .map(([d,rows]) => ({ d, rows, total: rows.reduce((s,r)=>s+r.qty,0) }));
   }, [filtered]);
 
   /* stats */
@@ -584,11 +612,13 @@ function App() {
           {/* controls */}
           <div style={{ display:"flex", alignItems:"center", gap:18, flexWrap:"wrap", marginBottom:18 }}>
             <Segmented
-              options={[{v:"range",l:"ช่วงเวลา"},{v:"day",l:"รายวัน"}]}
+              options={[{v:"range",l:"ช่วงเวลา"},{v:"month",l:"รายเดือน"},{v:"day",l:"รายวัน"}]}
               value={scope} onChange={setScope}
             />
             {scope === "range"
               ? <ChipRow chips={rangeChips} value={range} onChange={setRange}/>
+              : scope === "month"
+              ? <MonthNav selMonth={selMonth} setSelMonth={setSelMonth} rmData={rmData}/>
               : <DayNav
                   day={selectedDay} dateInfo={dateInfo} onPick={setSelDate}
                   onPrev={() => prevDate && setSelDate(prevDate)}
@@ -879,6 +909,72 @@ function ChipRow({ chips, value, onChange }) {
   );
 }
 
+/* ─── MonthNav component ─── */
+function MonthNav({ selMonth, setSelMonth, rmData }) {
+  /* build list of available months from data */
+  const months = useMemo(() => {
+    const s = new Set(rmData.map(r => r.d.slice(0,7)));
+    return [...s].sort();
+  }, [rmData]);
+
+  const idx   = months.indexOf(selMonth);
+  const prev  = months[idx - 1] || null;
+  const next  = months[idx + 1] || null;
+
+  function fmtMonth(ym) {
+    const [y, m] = ym.split("-").map(Number);
+    return TH_MONTHS[m - 1] + " " + (y + 543);
+  }
+  /* monthly summary for chips */
+  const summary = useMemo(() => {
+    const map = {};
+    months.forEach(ym => {
+      const rows = rmData.filter(r => r.d.slice(0,7) === ym);
+      map[ym] = rows.reduce((s,r) => s + r.qty, 0);
+    });
+    return map;
+  }, [rmData, months]);
+
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+      {/* prev/next arrows */}
+      <button
+        onClick={() => prev && setSelMonth(prev)}
+        disabled={!prev}
+        style={{ border:"1px solid var(--line)", background:"#fff", borderRadius:8, width:32, height:32,
+                 cursor:prev?"pointer":"default", opacity:prev?1:.35, fontSize:16, color:"var(--ink-2)" }}
+      >‹</button>
+
+      {/* month dropdown */}
+      <select
+        value={selMonth}
+        onChange={e => setSelMonth(e.target.value)}
+        style={{ border:"1px solid var(--line)", borderRadius:8, padding:"5px 10px",
+                 fontSize:14, fontWeight:600, color:"var(--ink-2)", background:"#fff",
+                 cursor:"pointer", height:32 }}
+      >
+        {months.map(ym => (
+          <option key={ym} value={ym}>
+            {fmtMonth(ym)} — {nf1(summary[ym]/1000)} ต.
+          </option>
+        ))}
+      </select>
+
+      <button
+        onClick={() => next && setSelMonth(next)}
+        disabled={!next}
+        style={{ border:"1px solid var(--line)", background:"#fff", borderRadius:8, width:32, height:32,
+                 cursor:next?"pointer":"default", opacity:next?1:.35, fontSize:16, color:"var(--ink-2)" }}
+      >›</button>
+
+      {/* current month badge */}
+      <span style={{ fontSize:12.5, color:"var(--faint)", marginLeft:4 }}>
+        {months.length} เดือน · ข้อมูลล่าสุด {months.length ? fmtMonth(months[months.length-1]) : "–"}
+      </span>
+    </div>
+  );
+}
+
 function DayNav({ day, dateInfo, onPick, onPrev, onNext, prevDisabled, nextDisabled, latest }) {
   const [open, setOpen] = useState(false);
   const has = dateInfo[day] > 0;
@@ -1050,15 +1146,25 @@ function _gateShow(msg){
   _gateLoad(false);
 }
 function _gateHide(){var g=document.getElementById('kst-gate');if(g)g.classList.add('hidden');}
+async function _waitMsal(maxMs){
+  const t0 = Date.now();
+  while (typeof msal === "undefined") {
+    if (Date.now() - t0 > (maxMs||6000)) return false;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  return true;
+}
 async function gateSilentTry(){
   try{
-    await _msalApp.initialize();
-    await _msalApp.handleRedirectPromise();
-    var acc=_msalApp.getAllAccounts();
+    const ok = await _waitMsal(6000);
+    if (!ok) { _gateShow("⚠ โหลดไลบรารี Microsoft ไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช"); return; }
+    await _getMsal().initialize();
+    await _getMsal().handleRedirectPromise();
+    var acc=_getMsal().getAllAccounts();
     if(acc.length>0){
       _gateLoad(true);
       var tid=acc[0].tenantId||(acc[0].idTokenClaims&&acc[0].idTokenClaims.tid);
-      if(tid&&tid!==KST_TENANT_ID){_msalApp.clearCache();_gateShow('⛔ บัญชีนี้ไม่อยู่ใน KST');return;}
+      if(tid&&tid!==KST_TENANT_ID){_getMsal().clearCache();_gateShow('⛔ บัญชีนี้ไม่อยู่ใน KST');return;}
       await kstFetchData(); return;
     }
   }catch(e){}
@@ -1067,8 +1173,19 @@ async function gateSilentTry(){
 async function gateLogin(){
   document.getElementById('gate-err').textContent='';
   _gateLoad(true);
-  try{ await kstFetchData(); }
-  catch(err){ _gateShow(err.message&&err.message.includes('ACCESS_DENIED')?'⛔ ไม่มีสิทธิ์ — ใช้บัญชี @kst-hatyai.com':'⚠ เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่'); }
+  try{
+    const ok = await _waitMsal(6000);
+    if (!ok) throw new Error("MSAL_NOT_LOADED");
+    await kstFetchData();
+  }
+  catch(err){
+    var m = err.message||'';
+    _gateShow(
+      m.includes('ACCESS_DENIED') ? '⛔ ไม่มีสิทธิ์ — ใช้บัญชี @kst-hatyai.com'
+      : m.includes('MSAL_NOT_LOADED') ? '⚠ โหลดไลบรารี Microsoft ไม่สำเร็จ — รีเฟรชหน้าแล้วลองใหม่'
+      : '⚠ เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่'
+    );
+  }
 }
 window.addEventListener('kst:data-ready',function(e){
   if(e.detail&&e.detail.accessDenied) _gateShow('⛔ ไม่มีสิทธิ์ — ใช้บัญชี @kst-hatyai.com');
