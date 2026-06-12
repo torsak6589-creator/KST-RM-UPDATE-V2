@@ -114,9 +114,11 @@ const KST_DRIVE_ID = "b!D6giGoE1uESBO7PRA7RLxFqpAw5iWfRFiv_0gjMFy8izTfh03nDXRLiL
 const KST_FILE_ID  = "014NXMQUBKW4HOOOFMRZBZIRWCDX6AHTJV";
 const KST_SHARE_TOKEN = "u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUuc2hhcmVwb2ludC5jb20vOng6L3MvS1NUUk1VUERBVEVWMi9JUUJzWkZvZEJsdXhUSkk1UnhWS0YzZXdBWFlydUttMjZ3WlF0d0IzaTFPWGRpND9lPTB2UEx3Ug";
 const KST_ENDPOINTS = [
-  /* 1: drive + item id โดยตรง (แบบเดียวกับ v17) */
+  /* 1: share link องค์กร (ทุกคนใน KST เข้าได้) */
+  "/shares/u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUuc2hhcmVwb2ludC5jb20vOng6L3MvS1NUUk1VUERBVEVWMi9JUUJzWkZvZEJsdXhUSkk1UnhWS0YzZXdBVnQ0VzhVSVZkV0k2U3dfdzE5TWVsTT9lPWZDMmVxeA/driveItem/content",
+  /* 2: drive + item id โดยตรง (สำหรับสมาชิก site) */
   "/drives/" + KST_DRIVE_ID + "/items/" + KST_FILE_ID + "/content",
-  /* 2: sharing token (fallback ของ v17) */
+  /* 3: sharing token เดิมของ v17 (fallback) */
   "/shares/" + KST_SHARE_TOKEN + "/driveItem/content",
 ];
 const KST_SHEET     = "RM RECORD";
