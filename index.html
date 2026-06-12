@@ -114,16 +114,9 @@ const KST_DRIVE_ID = "b!D6giGoE1uESBO7PRA7RLxFqpAw5iWfRFiv_0gjMFy8izTfh03nDXRLiL
 const KST_FILE_ID  = "014NXMQUBKW4HOOOFMRZBZIRWCDX6AHTJV";
 const KST_SHARE_TOKEN = "u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUuc2hhcmVwb2ludC5jb20vOng6L3MvS1NUUk1VUERBVEVWMi9JUUJzWkZvZEJsdXhUSkk1UnhWS0YzZXdBWFlydUttMjZ3WlF0d0IzaTFPWGRpND9lPTB2UEx3Ug";
 const KST_ENDPOINTS = [
-  /* ─── ไฟล์จริงที่ AppSheet เขียน (OneDrive: Torsak) ─── */
-  /* 1: UPN path — เสถียรสุดสำหรับผู้ใช้ทุกคน (ต้องแชร์ org-wide) */
-  { ep: "/users/torsak.ar@kst-hatyai.com/drive/root:/ADD%20(5).xlsx:/content", src: "appsheet" },
-  /* 2: share — direct URL */
-  { ep: "/shares/u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUtbXkuc2hhcmVwb2ludC5jb20vcGVyc29uYWwvdG9yc2FrX2FyX2tzdC1oYXR5YWlfY29tL0RvY3VtZW50cy9BREQlMjAoNSkueGxzeA/driveItem/content", src: "appsheet" },
-  /* 3: share — Doc.aspx URL (sourcedoc GUID) */
+  /* 1: ไฟล์จริงที่ AppSheet เขียน — ชี้ด้วย sourcedoc GUID (ยืนยันจาก AppSheet View source) */
   { ep: "/shares/u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUtbXkuc2hhcmVwb2ludC5jb20vOng6L3IvcGVyc29uYWwvdG9yc2FrX2FyX2tzdC1oYXR5YWlfY29tL19sYXlvdXRzLzE1L0RvYy5hc3B4P3NvdXJjZWRvYz0lN0IyOEQwRDIzNS00QTA4LTQ1NTEtODQ2Ny1GOUNFQzFENEEwQUUlN0QmZmlsZT1BREQlMjAoNSkueGxzeCZhY3Rpb249ZGVmYXVsdCZtb2JpbGVyZWRpcmVjdD10cnVl/driveItem/content", src: "appsheet" },
-  /* 4: /me/drive (เฉพาะ Torsak) */
-  { ep: "/me/drive/root:/ADD%20(5).xlsx:/content", src: "appsheet" },
-  /* ─── สำเนาใน SharePoint site (fallback) ─── */
+  /* 2-3: สำเนาใน SharePoint site (fallback — badge จะแสดงสีส้มเตือน) */
   { ep: "/drives/" + KST_DRIVE_ID + "/items/" + KST_FILE_ID + "/content", src: "site" },
   { ep: "/shares/" + KST_SHARE_TOKEN + "/driveItem/content", src: "site" },
 ];
