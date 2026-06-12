@@ -114,12 +114,18 @@ const KST_DRIVE_ID = "b!D6giGoE1uESBO7PRA7RLxFqpAw5iWfRFiv_0gjMFy8izTfh03nDXRLiL
 const KST_FILE_ID  = "014NXMQUBKW4HOOOFMRZBZIRWCDX6AHTJV";
 const KST_SHARE_TOKEN = "u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUuc2hhcmVwb2ludC5jb20vOng6L3MvS1NUUk1VUERBVEVWMi9JUUJzWkZvZEJsdXhUSkk1UnhWS0YzZXdBWFlydUttMjZ3WlF0d0IzaTFPWGRpND9lPTB2UEx3Ug";
 const KST_ENDPOINTS = [
-  /* 1: share link องค์กร (ทุกคนใน KST เข้าได้) */
-  "/shares/u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUuc2hhcmVwb2ludC5jb20vOng6L3MvS1NUUk1VUERBVEVWMi9JUUJzWkZvZEJsdXhUSkk1UnhWS0YzZXdBVnQ0VzhVSVZkV0k2U3dfdzE5TWVsTT9lPWZDMmVxeA/driveItem/content",
-  /* 2: drive + item id โดยตรง (สำหรับสมาชิก site) */
-  "/drives/" + KST_DRIVE_ID + "/items/" + KST_FILE_ID + "/content",
-  /* 3: sharing token เดิมของ v17 (fallback) */
-  "/shares/" + KST_SHARE_TOKEN + "/driveItem/content",
+  /* ─── ไฟล์จริงที่ AppSheet เขียน (OneDrive: Torsak) ─── */
+  /* 1: UPN path — เสถียรสุดสำหรับผู้ใช้ทุกคน (ต้องแชร์ org-wide) */
+  { ep: "/users/torsak.ar@kst-hatyai.com/drive/root:/ADD%20(5).xlsx:/content", src: "appsheet" },
+  /* 2: share — direct URL */
+  { ep: "/shares/u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUtbXkuc2hhcmVwb2ludC5jb20vcGVyc29uYWwvdG9yc2FrX2FyX2tzdC1oYXR5YWlfY29tL0RvY3VtZW50cy9BREQlMjAoNSkueGxzeA/driveItem/content", src: "appsheet" },
+  /* 3: share — Doc.aspx URL (sourcedoc GUID) */
+  { ep: "/shares/u!aHR0cHM6Ly9rc3RoYXR5YWkzNjUtbXkuc2hhcmVwb2ludC5jb20vOng6L3IvcGVyc29uYWwvdG9yc2FrX2FyX2tzdC1oYXR5YWlfY29tL19sYXlvdXRzLzE1L0RvYy5hc3B4P3NvdXJjZWRvYz0lN0IyOEQwRDIzNS00QTA4LTQ1NTEtODQ2Ny1GOUNFQzFENEEwQUUlN0QmZmlsZT1BREQlMjAoNSkueGxzeCZhY3Rpb249ZGVmYXVsdCZtb2JpbGVyZWRpcmVjdD10cnVl/driveItem/content", src: "appsheet" },
+  /* 4: /me/drive (เฉพาะ Torsak) */
+  { ep: "/me/drive/root:/ADD%20(5).xlsx:/content", src: "appsheet" },
+  /* ─── สำเนาใน SharePoint site (fallback) ─── */
+  { ep: "/drives/" + KST_DRIVE_ID + "/items/" + KST_FILE_ID + "/content", src: "site" },
+  { ep: "/shares/" + KST_SHARE_TOKEN + "/driveItem/content", src: "site" },
 ];
 const KST_SHEET     = "RM RECORD";
 
@@ -251,10 +257,10 @@ async function kstFetchData(interactive) {
   try {
     const token = await _getToken(interactive);
     /* ลองทุก endpoint ตามลำดับ — เก็บ error ทุกตัว */
-    let buf = null;
+    let buf = null, srcUsed = null;
     const errs = [];
     for (let i = 0; i < KST_ENDPOINTS.length; i++) {
-      const ep = KST_ENDPOINTS[i];
+      const { ep, src } = KST_ENDPOINTS[i];
       try {
         const res = await fetch(
           "https://graph.microsoft.com/v1.0" + ep,
@@ -268,7 +274,8 @@ async function kstFetchData(interactive) {
           continue;
         }
         buf = await res.arrayBuffer();
-        console.log("[KST] EP" + (i+1) + " OK:", ep.slice(0, 60));
+        srcUsed = src;
+        console.log("[KST] EP" + (i+1) + " OK (" + src + "):", ep.slice(0, 60));
         break;
       } catch (e) { errs.push("EP" + (i+1) + ": " + e.message); }
     }
@@ -280,7 +287,8 @@ async function kstFetchData(interactive) {
       count:     records.length,
       loading:   false,
       error:     null,
-      live:      true
+      live:      true,
+      src:       srcUsed
     };
     window.__KST_LOADED = true;
     console.log("[KST] Live load OK:", records.length, "records");
@@ -441,8 +449,9 @@ function SyncBadge() {
           ? <><span title={error} style={{cursor:"help"}} onClick={() => alert("รายละเอียด:\n" + error)}>⚠ ใช้ข้อมูลสำรอง (กดดูสาเหตุ)</span>
               <button onClick={() => kstFetchData(true)} style={{ border:"none", background:"var(--blue)", color:"#fff", cursor:"pointer", fontSize:11.5, padding:"3px 9px", borderRadius:6, fontWeight:600 }}>เชื่อมใหม่</button>
             </>
-          : <><span>{live ? "OneDrive" : "Static"} · {timeStr || "แล้ว"}</span>
-              <span style={{ width:8, height:8, borderRadius:"50%", background: live ? "#1e8e5a" : "#f5a623", display:"inline-block" }}/>
+          : <><span>{live ? (meta.src === "appsheet" ? "AppSheet Live" : "Site สำรอง") : "Static"} · {timeStr || "แล้ว"}</span>
+              <span style={{ width:8, height:8, borderRadius:"50%", background: live ? (meta.src === "appsheet" ? "#1e8e5a" : "#f5a623") : "#9aa3ad", display:"inline-block" }}
+                title={meta.src === "appsheet" ? "อ่านจากไฟล์ AppSheet โดยตรง (ล่าสุดเสมอ)" : meta.src === "site" ? "อ่านจากสำเนาใน SharePoint site — อาจไม่ใช่ข้อมูลล่าสุด" : "ข้อมูล static ในไฟล์"}/>
             </>
       }
     </div>
