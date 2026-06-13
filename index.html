@@ -524,7 +524,7 @@ function SpeciesCell({ sp }) {
 }
 
 /* ---------- table grid ---------- */
-const GRID = "132px minmax(190px,1.5fr) 168px 132px 104px 124px 104px";
+const GRID = "104px minmax(220px,1.5fr) 128px 118px 116px 116px 92px minmax(210px,1.3fr)";
 
 /* ---------- main ---------- */
 function App() {
@@ -733,7 +733,7 @@ function App() {
             boxShadow:"var(--shadow)", overflow:"hidden", marginTop:14
           }}>
             <div style={{ overflowX:"auto" }}>
-              <div style={{ minWidth:920 }}>
+              <div style={{ minWidth:1110 }}>
                 {/* column headers */}
                 <div style={{
                   display:"grid", gridTemplateColumns:GRID, gap:0,
@@ -741,11 +741,12 @@ function App() {
                   borderBottom:"1px solid var(--line)",
                   position:"sticky", top:0, background:"#fff", zIndex:5
                 }}>
-                  {["วันที่","ชื่อเปิดบิล","ประเภท","ชนิดวัตถุดิบ","ขนาด (ตัว/Kg)","ปริมาณ (Kg)","ราคา"].map((h,i) =>
+                  {["วันที่","ชื่อเปิดบิล","ประเภท","ชนิดวัตถุดิบ","ขนาด (ตัว/Kg)","ปริมาณ (Kg)","ราคา","หมายเหตุ"].map((h,i) =>
                     <div key={i} style={{
                       fontSize:12.5, fontWeight:600, color:"var(--muted)",
-                      textAlign: i>=4 ? "right" : "left",
-                      paddingRight: i>=4 ? 6 : 0, letterSpacing:.2
+                      textAlign: i>=4 && i<=6 ? "right" : "left",
+                      paddingRight: i>=4 && i<=6 ? 6 : 0, letterSpacing:.2,
+                      whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"
                     }}>{h}</div>
                   )}
                 </div>
@@ -883,6 +884,9 @@ function Row({ r }) {
       <div style={{ textAlign:"right", paddingRight:6, fontWeight:600, color:"var(--ink)" }}>{nf(r.qty)}</div>
       <div style={{ textAlign:"right", paddingRight:6, color:"var(--ink-2)" }}>
         {r.price ? <span><span style={{ color:"var(--faint)" }}>฿</span>{nf(r.price)}</span> : "—"}
+      </div>
+      <div style={{ paddingLeft:8, color:"var(--muted)", fontSize:13, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }} title={r.remark}>
+        {r.remark || ""}
       </div>
     </div>
   );
