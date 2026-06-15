@@ -73,36 +73,45 @@ func azure functionapp publish kst-rm-api
 ใน Azure Portal → Function App → **Configuration → Application settings**
 เพิ่มค่าเหล่านี้:
 
-| Name | Value |
-|------|-------|
-| `AZURE_TENANT_ID` | Directory (tenant) ID จาก App Registration Overview |
-| `AZURE_CLIENT_ID` | Application (client) ID |
-| `AZURE_CLIENT_SECRET` | Secret ที่สร้างใน Step 1.2 |
-| `SHAREPOINT_SITE_ID` | Site ID จาก Step 2 |
-| `EXCEL_FILE_PATH` | `/Shared Documents/ADD (5).xlsx` |
-| `EXCEL_SHEET_NAME` | `SOURCE` |
+| Name | Value | จำเป็น |
+|------|-------|--------|
+| `AZURE_TENANT_ID` | Directory (tenant) ID จาก App Registration Overview | ✅ |
+| `AZURE_CLIENT_ID` | Application (client) ID | ✅ |
+| `AZURE_CLIENT_SECRET` | Secret ที่สร้างใน Step 1.2 | ✅ |
+| `EXCEL_SHEET_NAME` | ชื่อ sheet RM (default `RM RECORD`, สำรอง `SOURCE`) | optional |
+| `SHARE_RM` | sharing token (`u!...`) ของไฟล์ RM RECORD (`ADD (5).xlsx`) | optional* |
+| `SHARE_PLAN` | sharing token (`u!...`) ของไฟล์ PLAN/ACTUAL/PRICE/RECEIVE (site KSTRMUPDATEV2) | optional* |
+
+> \* `SHARE_RM` / `SHARE_PLAN` มีค่า default ฝังในโค้ดอยู่แล้ว (ตรงกับที่ dashboard ใช้)
+> ตั้งเป็น App Setting เฉพาะเมื่อย้ายไฟล์/เปลี่ยนลิงก์แชร์ ก็ override ได้โดยไม่ต้องแก้โค้ด
+>
+> ℹ️ ไม่ต้องใช้ `SHAREPOINT_SITE_ID` / `EXCEL_FILE_PATH` อีกแล้ว — เวอร์ชันนี้ resolve
+> ไฟล์ผ่าน sharing token (`/shares/{token}/driveItem`) ซึ่งรองรับทั้งไฟล์บน
+> SharePoint site และ OneDrive ส่วนตัวด้วย Application permission
 
 กด **Save**
 
 ---
 
-## ขั้นตอน 5 — แก้ index.html
+## ขั้นตอน 5 — แก้ dashboard (`kst-rm-dashboard/kst_rm_v17.html`)
 
-เปิด `index.html` แก้บรรทัดนี้:
+แก้ค่าใน block `BACKEND API`:
 ```javascript
-const AZURE_FUNC_URL = "https://<YOUR-FUNC-APP>.azurewebsites.net/api/GetRMData";
+const API_BASE = 'https://kst-rm-api.azurewebsites.net/api'; // ← URL Function App จริง
+const API_CODE = '';  // ← function key ถ้าใช้ authLevel: function (เว้นว่างถ้า anonymous)
 ```
-เปลี่ยนเป็น URL จริง เช่น:
-```javascript
-const AZURE_FUNC_URL = "https://kst-rm-api.azurewebsites.net/api/GetRMData";
-```
+
+- ถ้า `API_BASE` ไม่ว่าง → ทุก sheet จะดึงผ่าน backend (app-level) ก่อน
+  → ผู้ใช้ทุกคนได้ข้อมูลชุดเดียวกับเจ้าของ
+- ถ้า backend ล่ม/เน็ตขาด → fallback อัตโนมัติไปวิธีอ่านด้วยสิทธิ์ผู้ใช้ + snapshot เดิม
 
 ### Function Key (ถ้าใช้ authLevel: function)
 ใน Azure Portal → Function App → Functions → GetRMData → **Function Keys**
-copy default key แล้วใส่:
-```javascript
-const FUNC_KEY = "xxxxxxxxxxxxxxxxxxx==";
-```
+copy default key แล้ววางใน `API_CODE`
+
+> 🔒 หมายเหตุความปลอดภัย: dashboard อยู่บน GitHub Pages (public) — function key ที่ฝัง
+> ในหน้าเว็บถือว่าเปิดเผยได้ ถ้าต้องการจำกัดเฉพาะคนในองค์กร แนะนำเปิด Azure AD
+> (Easy Auth) ที่ Function App แล้วให้ dashboard แนบ Bearer token ของผู้ใช้แทน `code`
 
 ---
 
@@ -117,19 +126,33 @@ https://torsak6589-creator.github.io
 
 ## ขั้นตอน 7 — ทดสอบ API
 
-เปิด browser ไปที่:
+Endpoint รองรับหลาย dataset ผ่าน query `?dataset=`:
+
+| dataset | sheet | ใช้ใน dashboard |
+|---------|-------|-----------------|
+| `rm` (default) | RM RECORD / SOURCE | ตารางรับซื้อ |
+| `plan` | PLAN_DAILY | แผนรับซื้อรายวัน |
+| `actual` | ACTUAL_TRACKING | KPI รายเดือน |
+| `price` | ราคา  RM คิดขาย | ราคา RM คิดขาย |
+| `receive` | RM-RECIVE | รับเข้าโรงงาน |
+
+เปิด browser ไปที่ (ใส่ `&code=<FUNC_KEY>` ถ้าใช้ authLevel: function):
 ```
-https://kst-rm-api.azurewebsites.net/api/GetRMData?code=<FUNC_KEY>
+https://kst-rm-api.azurewebsites.net/api/GetRMData?dataset=rm
 ```
 
-ควรได้ response:
+ควรได้ response (values = usedRange ดิบรวม header row):
 ```json
 {
-  "data": [...],
+  "values": [["วันที่","ชื่อเปิดบิล", ...], ["2026-06-09", ...]],
   "updatedAt": "2026-06-09T...",
-  "count": 150
+  "sheet": "RM RECORD",
+  "dataset": "rm",
+  "count": 150,
+  "data": [ { "d": "2026-06-09", "qty": 2000, ... } ]
 }
 ```
+(`data[]` ที่ parse แล้วจะแนบมาเฉพาะ `dataset=rm` เพื่อความเข้ากันได้กับของเดิม)
 
 ---
 

@@ -9,7 +9,6 @@
   "dependencies": {
     "@azure/identity": "^4.4.1",
     "@microsoft/microsoft-graph-client": "^3.0.7",
-    "@microsoft/microsoft-graph-client": "^3.0.7",
     "node-fetch": "^2.7.0"
   },
   "engines": {
