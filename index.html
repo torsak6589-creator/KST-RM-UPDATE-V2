@@ -5,61 +5,302 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>แจ้งวัตถุดิบเข้าประจำวัน — KST-RM UPDATE V2</title>
 <meta name="description" content="KST Raw Material Daily Report" />
-<meta name="theme-color" content="#1a73e8" />
+<meta name="theme-color" content="#f4f6fa" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%230b3d82'/><text x='16' y='21' text-anchor='middle' font-size='12' font-weight='700' fill='white' font-family='sans-serif'>KST</text></svg>" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>(function(){try{var t=localStorage.getItem("kst-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <style>
-  :root {
-    --blue: #1a73e8;
-    --blue-dark: #1666d0;
-    --ink: #202124;
-    --ink-2: #3c4043;
-    --muted: #5f6368;
-    --faint: #80868b;
-    --line: #e6e8eb;
-    --line-soft: #eef0f2;
-    --bg: #f5f6f8;
+  :root, :root[data-theme="light"] {
+    --bg: #f4f6fa;
+    --bg-grad: radial-gradient(1200px 500px at 85% -10%, #e3ebff 0%, transparent 60%), radial-gradient(900px 400px at -10% 0%, #fff4e0 0%, transparent 55%);
     --panel: #ffffff;
-    --group: #f1f3f4;
-    --hover: #f6f9fe;
-    --live: #e8456b;      /* กุ้งเป็น */
-    --dong: #5b6b7b;      /* กุ้งดอง */
-    --white-sp: #1a73e8;  /* กุ้งขาว */
-    --black-sp: #2b2f36;  /* กุ้งกุลาดำ */
-    --sea: #0f9488;       /* กุ้งทะเล */
-    --good: #1e8e5a;
-    --shadow: 0 1px 2px rgba(60,64,67,.10), 0 1px 3px rgba(60,64,67,.06);
+    --panel-2: #f8fafc;
+    --ink: #0f172a;
+    --ink-2: #334155;
+    --muted: #64748b;
+    --faint: #94a3b8;
+    --line: #e7ebf1;
+    --line-2: #f1f4f8;
+    --accent: #2563eb;
+    --accent-ink: #ffffff;
+    --accent-soft: #e8efff;
+    --gold: #c8982a;
+    --live: #f0506e;
+    --live-soft: #ffe8ed;
+    --dong: #64748b;
+    --dong-soft: #eef2f6;
+    --white-sp: #3b82f6;
+    --black-sp: #334155;
+    --sea: #0d9488;
+    --violet: #8b5cf6;
+    --up: #059669;
+    --down: #e11d48;
+    --warn: #d97706;
+    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 16px rgba(15,23,42,.05);
+    --pop-shadow: 0 12px 36px rgba(15,23,42,.18);
+    --nav-bg: rgba(255,255,255,.78);
+    --grid: #eef1f5;
+    --seg-on: #ffffff;
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --bg: #070b16;
+    --bg-grad: radial-gradient(1200px 520px at 85% -10%, rgba(37,99,235,.22) 0%, transparent 60%), radial-gradient(900px 420px at -10% 0%, rgba(200,152,42,.14) 0%, transparent 55%);
+    --panel: #0f1629;
+    --panel-2: #131c33;
+    --ink: #eef2ff;
+    --ink-2: #cbd5e1;
+    --muted: #94a3b8;
+    --faint: #64748b;
+    --line: #1e2a45;
+    --line-2: #172038;
+    --accent: #e0b84a;
+    --accent-ink: #0a0e1a;
+    --accent-soft: rgba(224,184,74,.14);
+    --gold: #e0b84a;
+    --live: #ff6b8a;
+    --live-soft: rgba(255,107,138,.14);
+    --dong: #7c8db5;
+    --dong-soft: rgba(124,141,181,.16);
+    --white-sp: #60a5fa;
+    --black-sp: #a5b4cf;
+    --sea: #2dd4bf;
+    --violet: #a78bfa;
+    --up: #34d399;
+    --down: #fb7185;
+    --warn: #fbbf24;
+    --shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 8px 28px rgba(0,0,0,.35);
+    --pop-shadow: 0 16px 40px rgba(0,0,0,.55);
+    --nav-bg: rgba(10,15,30,.72);
+    --grid: #1a2440;
+    --seg-on: #1d2945;
+    color-scheme: dark;
   }
   *, *::before, *::after { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; height: 100%; }
+  html, body { margin: 0; padding: 0; }
   body {
-    font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    -webkit-font-smoothing: antialiased;
-    font-variant-numeric: tabular-nums;
+    font-family: 'IBM Plex Sans Thai', 'Inter', system-ui, sans-serif;
+    background: var(--bg); background-image: var(--bg-grad); background-attachment: fixed;
+    color: var(--ink); -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums;
+    min-height: 100vh;
   }
-  #root { height: 100vh; }
-  .num { font-variant-numeric: tabular-nums; }
+  .num { font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif; font-feature-settings: "tnum" 1; }
+  button, input, select { font-family: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: default; }
   ::-webkit-scrollbar { width: 11px; height: 11px; }
-  ::-webkit-scrollbar-thumb {
-    background: #d3d7dc;
-    border-radius: 8px;
-    border: 3px solid transparent;
-    background-clip: content-box;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #b9bec5;
-    background-clip: content-box;
-  }
-  button { font-family: inherit; cursor: pointer; }
-  input { font-family: inherit; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; border: 3px solid transparent; background-clip: content-box; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: none; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+  .fade { animation: fadeUp .35s ease both; }
+
+  /* nav */
+  .nav { position: sticky; top: 0; z-index: 30; backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); background: var(--nav-bg); border-bottom: 1px solid var(--line); }
+  .nav-in { max-width: 1480px; margin: 0 auto; padding: 0 28px; height: 64px; display: flex; align-items: center; gap: 18px; }
+  .brand { display: flex; align-items: center; gap: 11px; flex: 0 0 auto; }
+  .logo { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; color: #fff; font: 700 11px 'Inter', sans-serif; letter-spacing: .5px; background: linear-gradient(135deg,#0b3d82,#2563eb); box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+  [data-theme="dark"] .logo { background: linear-gradient(135deg,#c8982a,#e0b84a); color: #0a0e1a; box-shadow: 0 4px 14px rgba(224,184,74,.3); }
+  .brand b { font: 700 15.5px 'Inter', sans-serif; letter-spacing: -.2px; display: block; }
+  .brand small { display: block; font-size: 11.5px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+  .search { flex: 1; max-width: 520px; margin-left: auto; position: relative; display: block; }
+  .search input { width: 100%; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); padding: 0 36px 0 38px; font-size: 14px; outline: none; transition: border .15s, box-shadow .15s; }
+  .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .search .ico { position: absolute; left: 12px; top: 11px; color: var(--faint); display: flex; }
+  .search .kbd { position: absolute; right: 10px; top: 10px; font: 600 11px 'Inter', sans-serif; color: var(--faint); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .search .clr { position: absolute; right: 8px; top: 8px; border: 0; background: var(--line-2); border-radius: 7px; width: 24px; height: 24px; display: grid; place-items: center; color: var(--muted); }
+  .sync { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+  .sync .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .sync .dot.ok { background: var(--up); box-shadow: 0 0 0 0 color-mix(in srgb, var(--up) 50%, transparent); animation: pulse 2s infinite; }
+  .sync .err { color: var(--down); cursor: help; }
+  .sync .mini-btn { border: 0; background: var(--accent); color: var(--accent-ink); font-size: 11.5px; padding: 4px 10px; border-radius: 7px; font-weight: 600; }
+  .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--accent); display: inline-block; animation: spin 1s linear infinite; }
+  .icon-btn { width: 38px; height: 38px; border-radius: 11px; border: 1px solid var(--line); background: var(--panel); display: grid; place-items: center; color: var(--ink-2); flex: 0 0 auto; }
+  .icon-btn:hover { border-color: var(--faint); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#8b5cf6,#ec4899); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 14px; flex: 0 0 auto; }
+
+  /* page */
+  .page { max-width: 1480px; margin: 0 auto; padding: 26px 28px 48px; }
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .eyebrow { font-size: 12.5px; color: var(--muted); font-weight: 500; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .eyebrow .chip { background: var(--accent-soft); color: var(--accent); padding: 2px 9px; border-radius: 99px; font-weight: 700; font-size: 11px; letter-spacing: .4px; }
+  .eyebrow .chip.warn { background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); }
+  h1 { margin: 6px 0 0; font-size: 28px; font-weight: 700; letter-spacing: -.3px; }
+  .btn { height: 40px; border-radius: 11px; border: 1px solid var(--line); background: var(--panel); padding: 0 14px; display: flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); box-shadow: var(--shadow); }
+  .btn.primary { background: var(--accent); border-color: transparent; color: var(--accent-ink); box-shadow: 0 6px 16px -6px var(--accent); }
+
+  /* filters */
+  .filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; padding: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); position: relative; z-index: 10; }
+  .seg { display: flex; background: var(--panel-2); border-radius: 11px; padding: 3px; border: 1px solid var(--line-2); }
+  .seg button { border: 0; background: transparent; padding: 7px 14px; border-radius: 9px; font-size: 13.5px; font-weight: 500; color: var(--muted); transition: all .15s; white-space: nowrap; }
+  .seg button.on { background: var(--seg-on); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(15,23,42,.12); }
+  .sep { width: 1px; height: 26px; background: var(--line); }
+  .grp-ctl { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .pill { border: 1px solid var(--line); background: transparent; height: 34px; padding: 0 13px; border-radius: 99px; font-size: 13px; font-weight: 500; color: var(--ink-2); display: inline-flex; align-items: center; gap: 7px; transition: all .15s; white-space: nowrap; }
+  .pill:hover { border-color: var(--faint); }
+  .pill.on { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+  .pill .d { width: 8px; height: 8px; border-radius: 50%; }
+  .spacer { flex: 1; }
+  .range-label { font-size: 12.5px; color: var(--muted); padding-right: 8px; }
+  .ctl { border: 1px solid var(--line); border-radius: 10px; height: 34px; padding: 0 10px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); background: var(--panel); }
+  .nav-arrow { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; width: 34px; height: 34px; display: grid; place-items: center; color: var(--ink-2); }
+  .nav-arrow:disabled { opacity: .35; }
+  .hint { font-size: 12.5px; color: var(--muted); }
+  .daynav { position: relative; display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 11px; padding: 2px 3px; background: var(--panel); }
+  .daynav .ghost { width: 30px; height: 30px; border: 0; background: transparent; border-radius: 8px; display: grid; place-items: center; color: var(--muted); }
+  .daynav .ghost:disabled { opacity: .3; }
+  .daynav .pick { display: flex; align-items: center; gap: 8px; min-width: 200px; justify-content: center; border: 0; background: transparent; border-radius: 8px; height: 30px; padding: 0 8px; font-weight: 600; font-size: 14px; }
+  .daynav .pick.open { background: var(--panel-2); }
+  .cal { position: absolute; top: calc(100% + 8px); left: 0; z-index: 50; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--pop-shadow); padding: 14px; width: 300px; animation: fadeUp .15s ease both; }
+  .cal-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-weight: 600; font-size: 15px; }
+  .cal-g { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+  .cal-dow { text-align: center; font-size: 11.5px; font-weight: 600; padding: 2px 0; color: var(--faint); }
+  .cal-d { position: relative; height: 36px; border: 0; border-radius: 9px; font-size: 13.5px; background: transparent; color: var(--faint); opacity: .6; }
+  .cal-d.has { background: var(--accent-soft); color: var(--accent); font-weight: 600; opacity: 1; }
+  .cal-d.has::after { content: ""; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+  .cal-d.sel { background: var(--accent); color: var(--accent-ink); font-weight: 700; opacity: 1; }
+  .cal-d.sel::after { display: none; }
+  .cal-f { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line-2); font-size: 11.5px; color: var(--faint); }
+
+  /* KPI */
+  .kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: 18px 20px; position: relative; min-width: 0; }
+  .kpi { overflow: hidden; }
+  .kpi .lbl { font-size: 13px; color: var(--muted); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .kpi .ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex: 0 0 auto; }
+  .kpi .val { font-size: 30px; font-weight: 700; letter-spacing: -.6px; margin: 12px 0 4px; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+  .kpi .val small { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+  .kpi .foot { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+  .delta { font-weight: 600; padding: 2px 7px; border-radius: 99px; font-size: 12px; white-space: nowrap; }
+  .delta.up { color: var(--up); background: color-mix(in srgb, var(--up) 12%, transparent); }
+  .delta.down { color: var(--down); background: color-mix(in srgb, var(--down) 12%, transparent); }
+  .spark { position: absolute; right: 14px; top: 16px; }
+
+  /* chart + side */
+  .row2 { display: grid; grid-template-columns: minmax(0,2.2fr) minmax(300px,1fr); gap: 16px; margin-bottom: 16px; }
+  .card h3 { margin: 0; font-size: 15px; font-weight: 600; }
+  .card .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .card-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .legend i.ln { height: 2px; width: 14px; border-radius: 2px; }
+  .legend i.rd { border-radius: 50%; }
+  .chart { width: 100%; height: 290px; position: relative; }
+  .chart svg { display: block; width: 100%; height: 100%; }
+  .tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--panel); font-size: 12.5px; padding: 10px 12px; border-radius: 10px; box-shadow: var(--pop-shadow); white-space: nowrap; z-index: 5; }
+  .tip .r { display: flex; justify-content: space-between; gap: 18px; margin-top: 4px; }
+  .tip .r i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .tip .tot { border-top: 1px solid color-mix(in srgb, var(--panel) 30%, transparent); padding-top: 4px; }
+  .empty { padding: 50px 20px; text-align: center; color: var(--faint); }
+  .donut-wrap { display: flex; align-items: center; gap: 18px; margin: 6px 0 18px; }
+  .donut { position: relative; width: 132px; height: 132px; flex: 0 0 auto; }
+  .donut .ctr { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .donut .ctr b { font-size: 20px; display: block; letter-spacing: -.3px; }
+  .donut .ctr span { font-size: 11.5px; color: var(--muted); }
+  .split-list { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .split-item .t { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .split-item .t span:first-child { display: flex; align-items: center; gap: 7px; color: var(--ink-2); font-weight: 500; }
+  .split-item .t i { width: 9px; height: 9px; border-radius: 50%; }
+  .split-item .v { font-size: 17px; font-weight: 700; margin-top: 2px; }
+  .split-item .v small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+  .divider { height: 1px; background: var(--line-2); margin: 4px 0 14px; }
+  .mini-h { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .4px; margin-bottom: 10px; }
+  .bars { display: flex; flex-direction: column; gap: 11px; }
+  .bar-row .t { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; gap: 8px; }
+  .bar-row .t span:first-child { color: var(--ink-2); font-weight: 500; }
+  .bar-row .t span:last-child { color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .track { height: 7px; border-radius: 99px; background: var(--line-2); overflow: hidden; }
+  .track > div { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.2,.8,.2,1); }
+  .tops { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; }
+  .top-i { background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 14px; padding: 14px; min-width: 0; }
+  .top-i .rk { width: 24px; height: 24px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font: 700 12px 'Inter', sans-serif; margin-bottom: 10px; }
+  .top-i .nm { font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .top-i .vv { font-size: 20px; font-weight: 700; margin: 4px 0 10px; }
+  .top-i .vv small { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+  /* table */
+  .tbl-card { padding: 0; overflow: hidden; }
+  .tbl-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--line); gap: 12px; flex-wrap: wrap; }
+  .scroll-x { overflow-x: auto; }
+  .tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
+  .tbl th { text-align: left; font-size: 11.5px; font-weight: 600; color: var(--muted); padding: 11px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; letter-spacing: .3px; background: var(--panel); }
+  .tbl th.r, .tbl td.r { text-align: right; }
+  .tbl td { padding: 11px 14px; border-bottom: 1px solid var(--line-2); white-space: nowrap; vertical-align: middle; }
+  .tbl tr.it:hover td { background: var(--panel-2); }
+  .tbl tr.grp td { background: var(--panel-2); padding: 9px 14px; cursor: pointer; border-bottom: 1px solid var(--line); }
+  .grp-in { display: flex; align-items: center; gap: 12px; }
+  .grp-in .chev { transition: transform .2s; color: var(--faint); display: flex; }
+  .grp.closed .chev { transform: rotate(-90deg); }
+  .grp-date { font-weight: 700; font-size: 14px; }
+  .grp-th { color: var(--muted); font-size: 12.5px; }
+  .grp-r { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .tag.live { background: var(--live-soft); color: var(--live); }
+  .tag.dong { background: var(--dong-soft); color: var(--dong); }
+  .tag.tot { background: var(--panel); border: 1px solid var(--line); color: var(--ink); }
+  .tag i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .raw { color: var(--faint); font-size: 12px; margin-left: 6px; }
+  .sp { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); }
+  .sp i { width: 8px; height: 8px; border-radius: 50%; }
+  .supp { font-weight: 500; max-width: 340px; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .supp small { display: block; color: var(--faint); font-size: 12px; font-weight: 400; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; }
+  .qty { font-weight: 700; }
+  .price { font-weight: 600; }
+  .price span { color: var(--faint); font-weight: 500; }
+  .remark { color: var(--muted); max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+  .sizebar { display: inline-flex; align-items: center; gap: 8px; }
+  .sizebar .tk { width: 44px; height: 4px; border-radius: 99px; background: var(--line-2); overflow: hidden; }
+  .sizebar .tk div { height: 100%; background: var(--accent); opacity: .65; }
+  .tbl-foot { display: flex; justify-content: space-between; align-items: center; padding: 13px 20px; font-size: 13px; color: var(--muted); flex-wrap: wrap; gap: 10px; }
+  .tbl-foot .legend b { color: var(--ink-2); }
+  .more { display: flex; justify-content: center; padding: 14px; border-bottom: 1px solid var(--line-2); }
+  .foot-note { text-align: center; color: var(--faint); font-size: 12px; margin-top: 20px; line-height: 1.8; }
+  .foot-note a { color: var(--accent); text-decoration: none; }
+
+  /* responsive */
+  @media (max-width: 1180px) {
+    .kpis { grid-template-columns: repeat(2,1fr); }
+    .row2 { grid-template-columns: 1fr; }
+    .tops { grid-template-columns: repeat(3,1fr); }
+    .sync .lbl { display: none; }
+  }
+  @media (max-width: 760px) {
+    .nav-in { padding: 0 16px; gap: 10px; }
+    .page { padding: 18px 16px 40px; }
+    .search .kbd, .brand small, .brand b, .avatar { display: none; }
+    .search { max-width: none; }
+    h1 { font-size: 22px; }
+    .btn span { display: none; }
+    .filters { gap: 8px; }
+    .sep, .range-label { display: none; }
+    .seg { width: 100%; overflow-x: auto; }
+    .seg button { flex: 1; }
+    .daynav .pick { min-width: 0; }
+    .kpis { gap: 10px; }
+    .card { padding: 14px; border-radius: 14px; }
+    .kpi .val { font-size: 22px; }
+    .kpi .foot .vs, .spark { display: none; }
+    .chart { height: 230px; }
+    .donut-wrap { flex-direction: column; align-items: stretch; }
+    .donut { margin: 0 auto; }
+    .tops { grid-template-columns: 1fr 1fr; }
+    .tbl thead { display: none; }
+    .tbl, .tbl tbody { display: block; }
+    .tbl tr.it { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 12px 16px; border-bottom: 1px solid var(--line-2); }
+    .tbl tr.it td { display: block; padding: 0; border: 0; white-space: normal; }
+    .tbl tr.it td.c-date, .tbl tr.it td.c-remark:empty { display: none; }
+    .tbl tr.it td.c-supp { grid-column: 1/2; }
+    .tbl tr.it td.c-qty { grid-column: 2/3; grid-row: 1/2; text-align: right; }
+    .tbl tr.it td.c-size, .tbl tr.it td.c-price { font-size: 12.5px; text-align: right; color: var(--muted); }
+    .tbl tr.it td.c-remark { grid-column: 1/3; font-size: 12px; max-width: none; }
+    .tbl tr.grp { display: block; }
+    .tbl tr.grp td { display: block; }
+    .grp-th, .grp-r .tag.dong, .grp-r .tag.live { display: none; }
+    .supp { max-width: none; white-space: normal; }
+    .sizebar .tk, .raw { display: none; }
   }
 
 /* ── Login Gate ── */
@@ -317,107 +558,79 @@ kstFetchData();
 </script>
 <script type="text/babel">
 /* global React, ReactDOM */
-const { useState, useMemo, useRef, useEffect } = React;
+const { useState, useMemo, useRef, useEffect, useLayoutEffect } = React;
 
 /* ---------- helpers ---------- */
 /* rmData จะถูก override โดย kst:data-ready event */
 let _DATA = (window.RM_DATA || []).slice();
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const TH_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 const TH_DOW = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+const TH_DOW_S = ["อา.","จ.","อ.","พ.","พฤ.","ศ.","ส."];
 
 function parseD(s) { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d); }
-function fmtDate(s) { const dt = parseD(s); return `${MONTHS[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`; }
-function fmtThaiLong(s) { const dt = parseD(s); return `${TH_DOW[dt.getDay()]}ที่ ${dt.getDate()} ${TH_MONTHS[dt.getMonth()]} ${dt.getFullYear() + 543}`; }
-function nf(n) { return n == null || isNaN(n) ? "–" : Math.round(n).toLocaleString("en-US"); }
-function nf1(n) { return n == null || isNaN(n) ? "–" : (Math.round(n*10)/10).toLocaleString("en-US"); }
-
-function todayStr() {
-  const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
-}
-let maxDateStr = _DATA.reduce((a,b) => b.d > a ? b.d : a, "0000-00-00");
-if (maxDateStr === "0000-00-00") maxDateStr = todayStr();
-let MAXD = parseD(maxDateStr);
 function ymd(dt) { return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`; }
 function addDays(s, n) { const dt = parseD(s); dt.setDate(dt.getDate() + n); return ymd(dt); }
+function daysBetween(a, b) { return Math.round((parseD(b) - parseD(a)) / 86400000) + 1; }
+function thShort(s) { const t = parseD(s); return `${t.getDate()} ${TH_MONTHS[t.getMonth()]}`; }
+function thDate(s)  { const t = parseD(s); return `${t.getDate()} ${TH_MONTHS[t.getMonth()]} ${t.getFullYear()+543}`; }
+function thLong(s)  { const t = parseD(s); return `${TH_DOW[t.getDay()]} ${thDate(s)}`; }
+function thMonth(ym){ const [y,m] = ym.split("-").map(Number); return `${TH_MONTHS[m-1]} ${y+543}`; }
+function nf(n)  { return n == null || isNaN(n) ? "–" : Math.round(n).toLocaleString("en-US"); }
+function nf1(n) { return n == null || isNaN(n) ? "–" : (Math.round(n*10)/10).toLocaleString("en-US"); }
+function todayStr() { return ymd(new Date()); }
+function maxDateOf(data) { const m = data.reduce((a,b) => b.d > a ? b.d : a, "0000-00-00"); return m === "0000-00-00" ? todayStr() : m; }
+function monthBounds(ym) { const [y,m] = ym.split("-").map(Number); return [ym + "-01", ymd(new Date(y, m, 0))]; }
+function prevMonth(ym) { const [y,m] = ym.split("-").map(Number); return ymd(new Date(y, m-2, 1)).slice(0,7); }
+const sumQty = rows => rows.reduce((s,r) => s + r.qty, 0);
+const isLive = r => r.type === "กุ้งเป็น";
+function wAvg(rows, key) {
+  const v = rows.filter(r => r[key] > 0 && r.qty > 0);
+  const q = sumQty(v);
+  return q ? v.reduce((s,r) => s + r[key] * r.qty, 0) / q : 0;
+}
+function spColor(sp) {
+  if (!sp) return "var(--faint)";
+  return sp.includes("ขาว") ? "var(--white-sp)" : sp.includes("ทะเล") ? "var(--sea)" : "var(--black-sp)";
+}
+/* "บริษัท X อ.ระโนด จ.สงขลา" → ["บริษัท X", "อ.ระโนด จ.สงขลา"] */
+function splitBill(bill) {
+  const b = (bill || "").trim();
+  const i = b.search(/\s(?=อ\.|จ\.|ต\.)/);
+  return i > 0 ? [b.slice(0, i), b.slice(i + 1)] : [b, ""];
+}
+function supplierKey(bill) { return splitBill(bill)[0] || "—"; }
+
+/* ---------- theme ---------- */
+function getTheme() { return document.documentElement.getAttribute("data-theme") || "light"; }
+function setThemeAttr(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  try { localStorage.setItem("kst-theme", t); } catch (_) {}
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute("content", t === "dark" ? "#070b16" : "#f4f6fa");
+}
 
 /* ---------- icons ---------- */
-const Icon = ({ d, size=22, sw=1.8, fill }) =>
-  <svg width={size} height={size} viewBox="0 0 24 24"
-    fill={fill||"none"} stroke={fill?"none":"currentColor"}
+const Icon = ({ d, size=18, sw=2 }) =>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
     strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">{d}</svg>;
-
 const I = {
-  menu:     <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>,
-  bank:     <><line x1="3" y1="21" x2="21" y2="21"/><path d="M3 10l9-6 9 6"/><line x1="5" y1="10" x2="5" y2="21"/><line x1="12" y1="10" x2="12" y2="21"/><line x1="19" y1="10" x2="19" y2="21"/></>,
-  download: <><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></>,
-  list:     <><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></>,
-  truck:    <><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></>,
-  clip:     <><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9z"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></>,
-  star:     <><polygon points="12 3 14.5 9 21 9.5 16 13.8 17.5 20 12 16.5 6.5 20 8 13.8 3 9.5 9.5 9"/></>,
-  keyboard: <><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></>,
-  users:    <><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M16 5.5a3 3 0 0 1 0 5.5"/><path d="M21 20c0-2.4-1.6-4.2-4-4.8"/></>,
-  grid:     <><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
-  info:     <><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8"/></>,
-  alert:    <><path d="M12 3l9 16H3z"/><line x1="12" y1="10" x2="12" y2="14"/><line x1="12" y1="17" x2="12" y2="17"/></>,
-  apps:     <><circle cx="5" cy="5" r="1.4"/><circle cx="12" cy="5" r="1.4"/><circle cx="19" cy="5" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/><circle cx="5" cy="19" r="1.4"/><circle cx="12" cy="19" r="1.4"/><circle cx="19" cy="19" r="1.4"/></>,
-  search:   <><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></>,
-  filter:   <><polygon points="3 4 21 4 14 12.5 14 19 10 21 10 12.5"/></>,
-  check:    <><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/></>,
-  plus:     <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+  search:   <><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></>,
+  x:        <><path d="M18 6L6 18M6 6l12 12"/></>,
+  download: <><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></>,
+  refresh:  <><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></>,
+  sun:      <><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></>,
+  moon:     <><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></>,
+  box:      <><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></>,
+  list:     <><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></>,
+  ruler:    <><path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></>,
+  baht:     <><path d="M8 4v16M8 4h5a3.5 3.5 0 010 7H8M8 11h6a3.5 3.5 0 010 7H8M11 2v2M11 20v2"/></>,
   chevL:    <><polyline points="15 6 9 12 15 18"/></>,
   chevR:    <><polyline points="9 6 15 12 9 18"/></>,
-  cal:      <><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></>,
-  caret:    <><polyline points="6 9 12 15 18 9"/></>
+  caret:    <><polyline points="6 9 12 15 18 9"/></>,
+  cal:      <><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></>
 };
 
-/* ---------- chrome ---------- */
-function Logo() {
-  return (
-    <div style={{
-      width: 34, height: 34, borderRadius: "50%",
-      background: "radial-gradient(circle at 35% 30%, #2b6fc4, #0b3d82)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      boxShadow: "inset 0 0 0 2px #fff, 0 0 0 1.5px #cfd6df", flex: "0 0 auto"
-    }}>
-      <span style={{ color: "#fff", fontWeight: 700, fontSize: 11, letterSpacing: .5, fontFamily: "'IBM Plex Sans',sans-serif" }}>KST</span>
-    </div>
-  );
-}
-
-function Sidebar() {
-  const items = [I.bank,I.download,I.list,I.truck,I.clip,I.star,I.keyboard,I.users,I.grid,I.star,I.info,I.alert,I.apps];
-  const active = 2;
-  return (
-    <nav style={{
-      width: 58, background: "#fff", borderRight: "1px solid var(--line)",
-      display: "flex", flexDirection: "column", alignItems: "center",
-      paddingTop: 8, gap: 2, flex: "0 0 auto", overflowY: "auto"
-    }}>
-      <button style={sbBtn(false)} title="เมนู"><Icon d={I.menu} size={22}/></button>
-      <div style={{ height: 8 }}/>
-      {items.map((it,i) =>
-        <button key={i} style={sbBtn(i===active)} title="">
-          <Icon d={it} size={21} sw={i===active?2:1.7}/>
-        </button>
-      )}
-    </nav>
-  );
-}
-
-function sbBtn(active) {
-  return {
-    width: 42, height: 42, borderRadius: 10, border: "none",
-    background: active ? "#e8f0fe" : "transparent",
-    color: active ? "var(--blue)" : "#5f6368",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    transition: "background .12s"
-  };
-}
-
-
-/* ─── Sync status badge ─── */
+/* ─── Sync status ─── */
 function SyncBadge() {
   const [meta, setMeta] = useState(window.__KST_META || { loading: true });
   useEffect(() => {
@@ -430,709 +643,242 @@ function SyncBadge() {
     };
   }, []);
   const { loading, error, updatedAt, live } = meta;
-  const ts      = updatedAt ? new Date(updatedAt) : null;
-  const timeStr = ts ? ts.toLocaleTimeString("th-TH", { hour:"2-digit", minute:"2-digit" }) : "";
+  const timeStr = updatedAt ? new Date(updatedAt).toLocaleTimeString("th-TH", { hour:"2-digit", minute:"2-digit" }) : "";
+  if (loading) return <div className="sync"><span className="spinner"/><span className="lbl">เชื่อมต่อ OneDrive…</span></div>;
+  if (meta.accessDenied) return <div className="sync"><span className="err">⛔ ไม่มีสิทธิ์ — ใช้อีเมล @kst-hatyai.com</span></div>;
+  if (error) return (
+    <div className="sync">
+      <span className="err" title={error} onClick={() => alert("รายละเอียด:\n" + error)}>⚠ <span className="lbl">ใช้ข้อมูลสำรอง</span></span>
+      <button className="mini-btn" onClick={() => kstFetchData(true)}>เชื่อมใหม่</button>
+    </div>
+  );
+  const src = live ? (meta.src === "appsheet" ? "AppSheet Live" : "Site สำรอง") : "Static";
+  const color = live ? (meta.src === "appsheet" ? "var(--up)" : "var(--warn)") : "var(--faint)";
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12.5, color: error ? "#e8456b" : "var(--faint)" }}>
-      {loading
-        ? <><span style={{ color:"var(--blue)" }}>เชื่อมต่อ OneDrive…</span>
-            <span style={{ width:14, height:14, borderRadius:"50%", border:"2px solid #cfd6df", borderTopColor:"var(--blue)", display:"inline-block", animation:"spin 1s linear infinite" }}/>
-          </>
-        : meta.accessDenied
-          ? <span style={{ color:"#e8456b", fontWeight:600 }}>⛔ ไม่มีสิทธิ์ — กรุณาใช้อีเมล @kst-hatyai.com</span>
-        : error
-          ? <><span title={error} style={{cursor:"help"}} onClick={() => alert("รายละเอียด:\n" + error)}>⚠ ใช้ข้อมูลสำรอง (กดดูสาเหตุ)</span>
-              <button onClick={() => kstFetchData(true)} style={{ border:"none", background:"var(--blue)", color:"#fff", cursor:"pointer", fontSize:11.5, padding:"3px 9px", borderRadius:6, fontWeight:600 }}>เชื่อมใหม่</button>
-            </>
-          : <><span>{live ? (meta.src === "appsheet" ? "AppSheet Live" : "Site สำรอง") : "Static"} · {timeStr || "แล้ว"}</span>
-              <span style={{ width:8, height:8, borderRadius:"50%", background: live ? (meta.src === "appsheet" ? "#1e8e5a" : "#f5a623") : "#9aa3ad", display:"inline-block" }}
-                title={meta.src === "appsheet" ? "อ่านจากไฟล์ AppSheet โดยตรง (ล่าสุดเสมอ)" : meta.src === "site" ? "อ่านจากสำเนาใน SharePoint site — อาจไม่ใช่ข้อมูลล่าสุด" : "ข้อมูล static ในไฟล์"}/>
-            </>
-      }
+    <div className="sync" title={meta.src === "appsheet" ? "อ่านจากไฟล์ AppSheet โดยตรง (ล่าสุดเสมอ)" : meta.src === "site" ? "อ่านจากสำเนาใน SharePoint site — อาจไม่ใช่ข้อมูลล่าสุด" : "ข้อมูล static ในไฟล์"}>
+      <span className={"dot" + (live && meta.src === "appsheet" ? " ok" : "")} style={{ background: color }}/>
+      <span className="lbl">{src} · {timeStr || "แล้ว"}</span>
     </div>
   );
 }
 
-function TopBar({ query, setQuery }) {
+function TopBar({ query, setQuery, theme, toggleTheme }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key === "/" && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); ref.current && ref.current.focus(); }
+      if (e.key === "Escape" && document.activeElement === ref.current) { setQuery(""); ref.current.blur(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
   return (
-    <header style={{
-      height: 60, background: "#fff", borderBottom: "1px solid var(--line)",
-      display: "flex", alignItems: "center", gap: 14, padding: "0 18px",
-      flex: "0 0 auto", zIndex: 20
-    }}>
-      <Logo/>
-      <div style={{ fontWeight: 600, fontSize: 18, color: "var(--ink)", fontFamily: "'IBM Plex Sans',sans-serif", letterSpacing: .2, whiteSpace: "nowrap" }}>
-        KST-RM <span style={{ color: "var(--blue)" }}>UPDATE</span> V2
-      </div>
-      <div style={{ flex: 1, maxWidth: 680, margin: "0 auto", position: "relative" }}>
-        <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: "#80868b", display: "flex" }}>
-          <Icon d={I.search} size={19}/>
-        </span>
-        <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="ค้นหา ชื่อบิล / remark / จังหวัด"
-          style={{
-            width: "100%", height: 42, border: "1px solid transparent",
-            background: "#f1f3f4", borderRadius: 24,
-            padding: "0 18px 0 46px", fontSize: 14.5, color: "var(--ink)", outline: "none"
-          }}
-          onFocus={e => { e.target.style.background="#fff"; e.target.style.borderColor="#dadce0"; e.target.style.boxShadow="0 1px 4px rgba(60,64,67,.16)"; }}
-          onBlur={e  => { e.target.style.background="#f1f3f4"; e.target.style.borderColor="transparent"; e.target.style.boxShadow="none"; }}
-        />
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
+    <header className="nav">
+      <div className="nav-in">
+        <div className="brand">
+          <div className="logo">KST</div>
+          <div><b>KST-RM Update V2</b><small>ระบบติดตามวัตถุดิบ</small></div>
+        </div>
+        <label className="search">
+          <span className="ico"><Icon d={I.search} size={17}/></span>
+          <input ref={ref} value={query} onChange={e => setQuery(e.target.value)} placeholder="ค้นหาชื่อบิล, จังหวัด, ชนิดกุ้ง, หมายเหตุ…"/>
+          {query
+            ? <button className="clr" onClick={() => setQuery("")} title="ล้าง"><Icon d={I.x} size={14}/></button>
+            : <span className="kbd">/</span>}
+        </label>
         <SyncBadge/>
-        <div style={{
-          width: 34, height: 34, borderRadius: "50%", background: "#7b61ff",
-          color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-          fontWeight: 600, fontSize: 15
-        }}>T</div>
+        <button className="icon-btn" onClick={() => kstFetchData(false)} title="ดึงข้อมูลล่าสุด"><Icon d={I.refresh} size={17}/></button>
+        <button className="icon-btn" onClick={toggleTheme} title={theme === "dark" ? "โหมดสว่าง" : "โหมดมืด (Navy & Gold)"}>
+          <Icon d={theme === "dark" ? I.sun : I.moon} size={17}/>
+        </button>
+        <div className="avatar">T</div>
       </div>
     </header>
   );
 }
 
-/* ---------- dots / badges ---------- */
-const typeColor = t => t === "กุ้งเป็น" ? "var(--live)" : "var(--dong)";
-
-function Dot({ color, size=9 }) {
-  return <span style={{ width: size, height: size, borderRadius: "50%", background: color, flex: "0 0 auto", display: "inline-block" }}/>;
+/* ---------- widgets ---------- */
+function Sparkline({ vals, color }) {
+  const id = useMemo(() => "sg" + Math.random().toString(36).slice(2,8), []);
+  const v = vals.filter(x => x > 0);
+  if (v.length < 2) return null;
+  const w = 92, h = 34, mx = Math.max(...v), mn = Math.min(...v), rg = mx - mn || 1;
+  const d = v.map((x,i) => (i ? "L" : "M") + (i/(v.length-1)*w).toFixed(1) + " " + (h - 3 - (x-mn)/rg*(h-6)).toFixed(1)).join(" ");
+  return (
+    <svg className="spark" width={w} height={h}>
+      <defs><linearGradient id={id} x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor={color} stopOpacity=".25"/><stop offset="1" stopColor={color} stopOpacity="0"/></linearGradient></defs>
+      <path d={`${d} L${w} ${h} L0 ${h}Z`} fill={`url(#${id})`}/>
+      <path d={d} fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
 }
 
-function TypeCell({ t, raw }) {
+function Delta({ cur, prev, invert, label }) {
+  if (!prev || !cur || !label) return null;
+  const p = (cur - prev) / prev * 100;
+  const up = p >= 0, good = invert ? !up : up;
+  return <><span className={"delta " + (good ? "up" : "down")}>{up ? "▲" : "▼"} {Math.abs(p).toFixed(1)}%</span><span className="vs">{label}</span></>;
+}
+
+function Kpi({ label, icon, color, value, unit, prefix, foot, spark }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-      <Dot color={typeColor(t)}/>
-      <span style={{ fontWeight: 500, color: "var(--ink-2)", whiteSpace: "nowrap" }}>{t}</span>
-      {raw && raw !== t &&
-        <span style={{ color: "var(--faint)", fontSize: 12.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          {raw.replace("กุ้งเป็น","").replace("กุ้งดอง","").replace("BROKER","").trim()}
-        </span>
-      }
+    <div className="card kpi fade">
+      <div className="lbl">
+        <span className="ic" style={{ background:`color-mix(in srgb, ${color} 14%, transparent)`, color }}><Icon d={icon} size={16}/></span>
+        {label}
+      </div>
+      {spark && <Sparkline vals={spark} color={color}/>}
+      <div className="val num">{prefix}{value}<small>{unit}</small></div>
+      <div className="foot">{foot}</div>
     </div>
   );
 }
 
-function SpeciesCell({ sp }) {
-  if (!sp) return <span style={{ color: "#b9bdc2", fontStyle: "italic", fontSize: 13 }}>ไม่ระบุ</span>;
-  const c = sp.includes("ขาว") ? "var(--white-sp)" : sp.includes("ทะเล") ? "var(--sea)" : "var(--black-sp)";
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <Dot color={c}/>
-      <span style={{ color: "var(--ink-2)", whiteSpace: "nowrap", fontFamily: '"IBM Plex Sans"' }}>{sp}</span>
-    </div>
-  );
-}
-
-/* ---------- table grid ---------- */
-const GRID = "104px minmax(220px,1.5fr) 128px 118px 116px 116px 92px minmax(210px,1.3fr)";
-
-/* ---------- main ---------- */
-function App() {
-  const [query,    setQuery]   = useState("");
-  const [range,    setRange]   = useState(30);
-  const [type,     setType]    = useState("all");
-  const [scope,    setScope]   = useState("range");
-  const [rmData,   setRmData]  = useState(_DATA);
-  const [syncState,setSyncState] = useState(window.__KST_META || { loading: true, updatedAt: null, error: null });
-  const [selDate,  setSelDate] = useState(maxDateStr);
-  const [selMonth, setSelMonth] = useState(() => maxDateStr.slice(0,7)); /* YYYY-MM */
-  const [dFrom,    setDFrom]   = useState(() => addDays(maxDateStr, -6));
-  const [dTo,      setDTo]     = useState(maxDateStr);
-
-  /* Listen for live data from OneDrive/Graph */
-  useEffect(() => {
-    function onReady(e) {
-      const fresh = (window.RM_DATA || []).slice();
-      if (!fresh.length) return;
-      maxDateStr = fresh.reduce((a,b) => b.d > a ? b.d : a, "0000-00-00");
-      if (maxDateStr === "0000-00-00") maxDateStr = todayStr();
-      MAXD = parseD(maxDateStr);
-      setRmData(fresh);
-      setSelDate(maxDateStr);
-      setSyncState(window.__KST_META || {});
-    }
-    window.addEventListener("kst:data-ready", onReady);
-    /* Auto-refresh ทุก 3 นาที + refresh เมื่อกลับมาที่แท็บ */
-    const timer = setInterval(() => kstFetchData(false), 3 * 60 * 1000);
-    const onVis = () => { if (document.visibilityState === "visible") kstFetchData(false); };
-    document.addEventListener("visibilitychange", onVis);
-    return () => { window.removeEventListener("kst:data-ready", onReady); clearInterval(timer); document.removeEventListener("visibilitychange", onVis); };
+function useWidth(ref) {
+  const [w, setW] = useState(0);
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    setW(ref.current.clientWidth);
+    const ro = new ResizeObserver(es => setW(es[0].contentRect.width));
+    ro.observe(ref.current);
+    return () => ro.disconnect();
   }, []);
+  return w;
+}
 
-  /* per-date qty for calendar markers + day nav */
-  const dateInfo = useMemo(() => {
+function TrendChart({ days }) {
+  const ref = useRef(null);
+  const W = useWidth(ref);
+  const [hov, setHov] = useState(null);
+  const tipRef = useRef(null);
+  const [tipPos, setTipPos] = useState({ left: 0, top: 0 });
+  const H = ref.current ? ref.current.clientHeight || 290 : 290;
+  const pl = 44, pr = 8, pt = 10, pb = 26;
+  const iw = Math.max(1, W - pl - pr), ih = H - pt - pb;
+  const mx = Math.max(1, ...days.map(d => d.total)) * 1.1;
+  const y = v => pt + ih - v / mx * ih;
+  const bw = days.length ? iw / days.length : 0, gap = Math.min(6, bw * .28);
+  const step = (() => { const raw = mx / 4; const p = Math.pow(10, Math.floor(Math.log10(raw))); return Math.ceil(raw / p) * p; })();
+  const ticks = []; for (let v = 0; v <= mx; v += step) ticks.push(v);
+  const every = Math.ceil(days.length / Math.max(4, Math.floor(iw / 52)));
+  const ma = days.map((_,i) => { const a = days.slice(Math.max(0, i-6), i+1); return a.reduce((s,x) => s + x.total, 0) / a.length; });
+
+  useLayoutEffect(() => {
+    if (hov == null || !tipRef.current) return;
+    const d = days[hov]; if (!d) return;
+    const tw = tipRef.current.offsetWidth, th = tipRef.current.offsetHeight;
+    const bx = pl + hov * bw + bw / 2;
+    setTipPos({ left: Math.max(0, Math.min(W - tw, bx - tw / 2)), top: Math.max(0, y(d.total) - th - 10) });
+  }, [hov, W]);
+
+  if (!days.length) return <div className="chart" ref={ref}><div className="empty">ไม่มีข้อมูลในช่วงที่เลือก</div></div>;
+  const hd = hov != null ? days[hov] : null;
+  return (
+    <div className="chart" ref={ref} onMouseLeave={() => setHov(null)}>
+      {W > 0 && <svg width={W} height={H}>
+        {ticks.map((v,i) => <g key={i}>
+          <line x1={pl} x2={W-pr} y1={y(v)} y2={y(v)} stroke="var(--grid)" strokeDasharray={i ? "3 4" : null}/>
+          <text x={pl-8} y={y(v)+4} textAnchor="end" fontSize="11" fill="var(--faint)" fontFamily="Inter">{v >= 1000 ? nf1(v/1000) + "t" : v}</text>
+        </g>)}
+        {days.map((d,i) => {
+          const x = pl + i*bw + gap/2, w = Math.max(1, bw - gap), dong = d.total - d.live, r = Math.min(5, w/2);
+          const yT = y(d.total), yL = y(dong), base = pt + ih;
+          return <g key={d.d}>
+            {hov === i && <rect x={pl + i*bw} y={pt} width={bw} height={ih} fill="var(--line-2)" opacity=".8"/>}
+            {dong > 0 && (d.live > 0
+              ? <rect x={x} y={yL} width={w} height={base - yL} fill="var(--dong)" opacity=".85"/>
+              : <path d={`M${x} ${base} V${yL+r} Q${x} ${yL} ${x+r} ${yL} H${x+w-r} Q${x+w} ${yL} ${x+w} ${yL+r} V${base}Z`} fill="var(--dong)" opacity=".85"/>)}
+            {d.live > 0 && <path d={`M${x} ${yL+.5} V${yT+r} Q${x} ${yT} ${x+r} ${yT} H${x+w-r} Q${x+w} ${yT} ${x+w} ${yT+r} V${yL+.5}Z`} fill="var(--live)"/>}
+            {(i % every === 0 || i === days.length - 1) &&
+              <text x={x + w/2} y={H-6} textAnchor="middle" fontSize="11" fill="var(--faint)" fontFamily="Inter">{parseD(d.d).getDate()}/{parseD(d.d).getMonth()+1}</text>}
+          </g>;
+        })}
+        {days.length > 2 && <path d={ma.map((v,i) => (i ? "L" : "M") + (pl + i*bw + bw/2).toFixed(1) + " " + y(v).toFixed(1)).join(" ")}
+          fill="none" stroke="var(--gold)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" pointerEvents="none"/>}
+        {days.map((d,i) => <rect key={"h"+i} x={pl + i*bw} y={pt} width={bw} height={ih} fill="transparent" onMouseEnter={() => setHov(i)} onClick={() => setHov(i)}/>)}
+      </svg>}
+      {hd && <div className="tip" ref={tipRef} style={tipPos}>
+        <b>{thLong(hd.d)}</b>
+        <div className="r"><span><i style={{ background:"var(--live)" }}/>กุ้งเป็น</span><b className="num">{nf(hd.live)} Kg</b></div>
+        <div className="r"><span><i style={{ background:"var(--dong)" }}/>กุ้งดอง</span><b className="num">{nf(hd.total - hd.live)} Kg</b></div>
+        <div className="r tot"><span>รวม · {hd.count} รายการ</span><b className="num">{nf(hd.total)} Kg</b></div>
+        {hd.price > 0 && <div className="r"><span>ราคาเฉลี่ย</span><b className="num">฿{nf(hd.price)}</b></div>}
+      </div>}
+    </div>
+  );
+}
+
+function Donut({ live, dong }) {
+  const tot = live + dong || 1, lp = live / tot;
+  const R = 54, C = 2 * Math.PI * R, L = C * lp;
+  return (
+    <div className="donut">
+      <svg width="132" height="132" viewBox="0 0 132 132" style={{ transform:"rotate(-90deg)" }}>
+        <circle cx="66" cy="66" r={R} fill="none" stroke={live + dong ? "var(--dong)" : "var(--line-2)"} strokeOpacity=".85" strokeWidth="14"/>
+        {live > 0 && <circle cx="66" cy="66" r={R} fill="none" stroke="var(--live)" strokeWidth="14" strokeDasharray={`${L} ${C}`} strokeLinecap={lp < 1 ? "round" : "butt"}/>}
+      </svg>
+      <div className="ctr"><div><b className="num">{nf1((live + dong) / 1000)}</b><span>ตันรวม</span></div></div>
+    </div>
+  );
+}
+
+/* ---------- filters ---------- */
+function MonthNav({ selMonth, setSelMonth, rmData }) {
+  const summary = useMemo(() => {
     const m = {};
-    rmData.forEach(r => { m[r.d] = (m[r.d]||0) + r.qty; });
+    rmData.forEach(r => { const k = r.d.slice(0,7); m[k] = (m[k] || 0) + r.qty; });
     return m;
   }, [rmData]);
-
-  const allDatesAsc = useMemo(() => Object.keys(dateInfo).sort(), [dateInfo]);
-  const selectedDay = selDate;
-
-  const prevDate = useMemo(() => {
-    let best = null;
-    for (const d of allDatesAsc) { if (d < selDate) best = d; else break; }
-    return best;
-  }, [allDatesAsc, selDate]);
-
-  const nextDate = useMemo(() => {
-    for (const d of allDatesAsc) { if (d > selDate) return d; }
-    return null;
-  }, [allDatesAsc, selDate]);
-
-  /* filtered records */
-  const filtered = useMemo(() => {
-    let rows = rmData;
-    if (scope === "day") {
-      rows = rows.filter(r => r.d === selectedDay);
-    } else if (scope === "month") {
-      rows = rows.filter(r => r.d.slice(0,7) === selMonth);
-    } else if (scope === "custom") {
-      const lo = dFrom && dTo && dFrom > dTo ? dTo : dFrom;
-      const hi = dFrom && dTo && dFrom > dTo ? dFrom : dTo;
-      if (lo) rows = rows.filter(r => r.d >= lo);
-      if (hi) rows = rows.filter(r => r.d <= hi);
-    } else if (range > 0) {
-      const cut = new Date(MAXD);
-      cut.setDate(cut.getDate() - range + 1);
-      const cutStr = `${cut.getFullYear()}-${String(cut.getMonth()+1).padStart(2,"0")}-${String(cut.getDate()).padStart(2,"0")}`;
-      rows = rows.filter(r => r.d >= cutStr);
-    }
-    if (type !== "all") rows = rows.filter(r => r.type === type);
-    const q = query.trim().toLowerCase();
-    if (q) rows = rows.filter(r => (r.bill+" "+r.remark+" "+r.prov+" "+r.species).toLowerCase().includes(q));
-    return rows.slice().sort((a,b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
-  }, [rmData, scope, selectedDay, selMonth, dFrom, dTo, range, type, query]);
-
-  /* group by date (or week within month) */
-  const groups = useMemo(() => {
-    const m = new Map();
-    filtered.forEach(r => { if (!m.has(r.d)) m.set(r.d,[]); m.get(r.d).push(r); });
-    return [...m.entries()]
-      .sort((a,b) => b[0].localeCompare(a[0]))
-      .map(([d,rows]) => ({ d, rows, total: rows.reduce((s,r)=>s+r.qty,0) }));
-  }, [filtered]);
-
-  /* stats */
-  const stats = useMemo(() => {
-    const total  = filtered.reduce((s,r)=>s+r.qty,0);
-    const live   = filtered.filter(r=>r.type==="กุ้งเป็น").reduce((s,r)=>s+r.qty,0);
-    const dong   = total - live;
-    const days   = new Set(filtered.map(r=>r.d)).size;
-    /* ราคาเฉลี่ยถ่วงน้ำหนัก: Σ(ราคา × kg) ÷ Σ(kg) เฉพาะรายการที่มีราคา */
-    const priced = filtered.filter(r => r.price > 0 && r.qty > 0);
-    const wSum   = priced.reduce((s,r) => s + r.price * r.qty, 0);
-    const wQty   = priced.reduce((s,r) => s + r.qty, 0);
-    const avg    = wQty > 0 ? wSum / wQty : 0;
-    const prices = priced.map(r => r.price);
-    const pmin   = prices.length ? Math.min(...prices) : 0;
-    const pmax   = prices.length ? Math.max(...prices) : 0;
-    /* ขนาดเฉลี่ยถ่วงน้ำหนัก: Σ(ขนาด × kg) ÷ Σ(kg) เฉพาะรายการที่มีขนาด */
-    const sized  = filtered.filter(r => r.size > 0 && r.qty > 0);
-    const szQty  = sized.reduce((s,r) => s + r.qty, 0);
-    const szAvg  = szQty > 0 ? sized.reduce((s,r) => s + r.size * r.qty, 0) / szQty : 0;
-    const sizes  = sized.map(r => r.size);
-    const szMin  = sizes.length ? Math.min(...sizes) : 0;
-    const szMax  = sizes.length ? Math.max(...sizes) : 0;
-    return { total, live, dong, days, count: filtered.length, avg, pmin, pmax, szAvg, szMin, szMax };
-  }, [filtered]);
-
-  /* trend bars (up to 30 most-recent days in filtered, chronological) */
-  const trend = useMemo(() => {
-    return groups.map(g => ({
-      d:    g.d,
-      live: g.rows.filter(r=>r.type==="กุ้งเป็น").reduce((s,r)=>s+r.qty,0),
-      dong: g.rows.filter(r=>r.type==="กุ้งดอง").reduce((s,r)=>s+r.qty,0),
-      total: g.total
-    })).slice(0,30).reverse();
-  }, [groups]);
-
-  const trendMax = Math.max(1, ...trend.map(t=>t.total));
-
-  const rangeChips = [
-    { v:7,   l:"7 วัน"  },
-    { v:30,  l:"30 วัน" },
-    { v:90,  l:"90 วัน" },
-    { v:365, l:"1 ปี"   },
-    { v:0,   l:"ทั้งหมด"},
-  ];
-  const typeChips = [
-    { v:"all",      l:"ทั้งหมด", c:null           },
-    { v:"กุ้งเป็น", l:"กุ้งเป็น",c:"var(--live)"  },
-    { v:"กุ้งดอง",  l:"กุ้งดอง", c:"var(--dong)"  },
-  ];
-
+  const months = useMemo(() => Object.keys(summary).sort(), [summary]);
+  const idx = months.indexOf(selMonth);
+  const prev = months[idx - 1] || null, next = months[idx + 1] || null;
   return (
-    <div style={{ display:"flex", height:"100vh", overflow:"hidden" }}>
-      <Sidebar/>
-      <div style={{ flex:1, display:"flex", flexDirection:"column", minWidth:0 }}>
-        <TopBar query={query} setQuery={setQuery}/>
-        <div style={{ flex:1, overflow:"auto", padding:"22px 26px 60px" }}>
-
-          {/* page header */}
-          <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", gap:16, marginBottom:18, flexWrap:"wrap" }}>
-            <div>
-              <div style={{ fontSize:13, color:"var(--faint)", fontWeight:500, marginBottom:2 }}>KST-RM UPDATE V2 · สรุปรายการ</div>
-              <h1 style={{ margin:0, fontSize:25, fontWeight:600, color:"var(--ink)", letterSpacing:.2 }}>แจ้งวัตถุดิบเข้าประจำวัน</h1>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-              <button style={btnGhost}><Icon d={I.filter} size={18}/></button>
-              <button style={btnGhost}><Icon d={I.check}  size={18}/></button>
-              <button style={btnPrimary}><Icon d={I.plus} size={18} sw={2.2}/><span>Add</span></button>
-            </div>
-          </div>
-
-          {/* controls */}
-          <div style={{ display:"flex", alignItems:"center", gap:18, flexWrap:"wrap", marginBottom:18 }}>
-            <Segmented
-              options={[{v:"range",l:"ช่วงเวลา"},{v:"month",l:"รายเดือน"},{v:"day",l:"รายวัน"},{v:"custom",l:"กำหนดวันที่"}]}
-              value={scope} onChange={setScope}
-            />
-            {scope === "range"
-              ? <ChipRow chips={rangeChips} value={range} onChange={setRange}/>
-              : scope === "custom"
-              ? <DateRangeFilter
-                  from={dFrom} to={dTo} setFrom={setDFrom} setTo={setDTo}
-                  minDate={allDatesAsc[0] || maxDateStr} latest={maxDateStr}
-                />
-              : scope === "month"
-              ? <MonthNav selMonth={selMonth} setSelMonth={setSelMonth} rmData={rmData}/>
-              : <DayNav
-                  day={selectedDay} dateInfo={dateInfo} onPick={setSelDate}
-                  onPrev={() => prevDate && setSelDate(prevDate)}
-                  onNext={() => nextDate && setSelDate(nextDate)}
-                  prevDisabled={!prevDate} nextDisabled={!nextDate}
-                  latest={maxDateStr}
-                />
-            }
-            <div style={{ width:1, height:24, background:"var(--line)" }}/>
-            <div style={{ display:"flex", gap:6 }}>
-              {typeChips.map(c =>
-                <button key={c.v} onClick={() => setType(c.v)} style={typeChip(type===c.v)}>
-                  {c.c && <Dot color={c.c} size={8}/>}<span>{c.l}</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* summary cards */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:14, marginBottom:14 }}>
-            <Card label="ปริมาณรวม" sub={`${stats.days} วัน · เฉลี่ย ${nf(stats.days ? stats.total/stats.days : 0)} Kg/วัน`}>
-              <Big v={nf(stats.total)} unit="Kg"/>
-            </Card>
-            <Card label="จำนวนรายการแจ้งเข้า" sub={`ล่าสุด ${fmtDate(groups[0] ? groups[0].d : maxDateStr)}`}>
-              <Big v={nf(stats.count)} unit="รายการ"/>
-            </Card>
-            <Card label="แยกตามประเภท (Kg)">
-              <SplitBar live={stats.live} dong={stats.dong}/>
-            </Card>
-            <Card label="ขนาดเฉลี่ย" sub={`ช่วง ${nf(stats.szMin)} – ${nf(stats.szMax)} ตัว/Kg`}>
-              <Big v={nf(stats.szAvg)} unit="ตัว/Kg"/>
-            </Card>
-            <Card label="ราคาเฉลี่ย" sub={`ช่วง ฿${nf(stats.pmin)} – ฿${nf(stats.pmax)} /Kg`}>
-              <Big prefix="฿" v={nf(stats.avg)} unit="/Kg"/>
-            </Card>
-          </div>
-
-          {/* trend chart */}
-          <Card label={scope==="day" ? "ปริมาณเข้ารายวัน (30 วันล่าสุดในมุมมอง)" : "ปริมาณเข้าต่อวัน"} pad>
-            <Trend trend={trend} max={trendMax}/>
-          </Card>
-
-          {/* data table */}
-          <div style={{
-            background:"#fff", border:"1px solid var(--line)", borderRadius:12,
-            boxShadow:"var(--shadow)", overflow:"hidden", marginTop:14
-          }}>
-            <div style={{ overflowX:"auto" }}>
-              <div style={{ minWidth:1110 }}>
-                {/* column headers */}
-                <div style={{
-                  display:"grid", gridTemplateColumns:GRID, gap:0,
-                  padding:"0 18px", height:46, alignItems:"center",
-                  borderBottom:"1px solid var(--line)",
-                  position:"sticky", top:0, background:"#fff", zIndex:5
-                }}>
-                  {["วันที่","ชื่อเปิดบิล","ประเภท","ชนิดวัตถุดิบ","ขนาด (ตัว/Kg)","ปริมาณ (Kg)","ราคา","หมายเหตุ"].map((h,i) =>
-                    <div key={i} style={{
-                      fontSize:12.5, fontWeight:600, color:"var(--muted)",
-                      textAlign: i>=4 && i<=6 ? "right" : "left",
-                      paddingRight: i>=4 && i<=6 ? 6 : 0, letterSpacing:.2,
-                      whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"
-                    }}>{h}</div>
-                  )}
-                </div>
-
-                {groups.length === 0 &&
-                  <div style={{ padding:"54px 20px", textAlign:"center", color:"var(--faint)" }}>ไม่พบรายการในช่วงที่เลือก</div>
-                }
-                {groups.map(g => <GroupBlock key={g.d} g={g}/>)}
-              </div>
-            </div>
-
-            {/* table footer */}
-            <div style={{
-              padding:"11px 18px", borderTop:"1px solid var(--line-soft)",
-              color:"var(--faint)", fontSize:13,
-              display:"flex", justifyContent:"space-between"
-            }}>
-              <span style={{ display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
-                <span>{nf(stats.count)} รายการ · {stats.days} วัน</span>
-                <span style={{ display:"flex", alignItems:"center", gap:5 }}>
-                  <span style={{ width:8, height:8, borderRadius:"50%", background:"var(--live)", display:"inline-block" }}/>
-                  <span style={{ color:"var(--ink-2)", fontWeight:500 }}>กุ้งเป็น</span>
-                  <span style={{ fontWeight:600, color:"var(--ink-2)" }}>{nf1(stats.live/1000)} ตัน</span>
-                </span>
-                <span style={{ display:"flex", alignItems:"center", gap:5 }}>
-                  <span style={{ width:8, height:8, borderRadius:"50%", background:"var(--dong)", display:"inline-block" }}/>
-                  <span style={{ color:"var(--ink-2)", fontWeight:500 }}>กุ้งดอง</span>
-                  <span style={{ fontWeight:600, color:"var(--ink-2)" }}>{nf1(stats.dong/1000)} ตัน</span>
-                </span>
-              </span>
-              <span>รวม {nf(stats.total)} Kg ({nf1(stats.total/1000)} ตัน)</span>
-            </div>
-          </div>
-
-          {/* footer */}
-          <div style={{ textAlign:"center", color:"#b0b5bb", fontSize:12, marginTop:18, lineHeight:1.7 }}>
-            แหล่งข้อมูล:&nbsp;
-            <a
-              href="https://ksthatyai365-my.sharepoint.com/personal/torsak_ar_kst-hatyai_com/Documents/ADD%20(5).xlsx?web=1"
-              target="_blank" rel="noopener"
-              style={{ color:"var(--blue)", textDecoration:"none" }}
-            >ADD (5).xlsx</a>
-            &nbsp;· ชีต SOURCE · {nf(rmData.length)} รายการทั้งหมด · อัปเดตล่าสุด {(window.__KST_META && window.__KST_META.updatedAt) ? new Date(window.__KST_META.updatedAt).toLocaleDateString("th-TH") : fmtDate(maxDateStr)}
-            <br/>
-            <span style={{ display:"inline-flex", alignItems:"center", gap:12, flexWrap:"wrap", justifyContent:"center" }}>
-              <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
-                <span style={{ width:9, height:9, borderRadius:"50%", background:"var(--white-sp)" }}/>กุ้งขาว
-              </span>
-              <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
-                <span style={{ width:9, height:9, borderRadius:"50%", background:"var(--black-sp)" }}/>กุ้งกุลาดำ
-              </span>
-              <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
-                <span style={{ width:9, height:9, borderRadius:"50%", background:"var(--sea)" }}/>กุ้งทะเล
-              </span>
-              <span>· อ่านจากคอลัมน์ S (ชนิดกุ้ง) ในต้นฉบับ</span>
-            </span>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- group block ---------- */
-function GroupBlock({ g }) {
-  const [open, setOpen] = useState(true);
-  return (
-    <div>
-      <div
-        onClick={() => setOpen(o => !o)}
-        style={{
-          display:"flex", alignItems:"center", gap:10,
-          padding:"0 18px", height:40,
-          background:"var(--group)", borderBottom:"1px solid var(--line)",
-          cursor:"pointer", position:"sticky", top:46, zIndex:4
-        }}
-      >
-        <span style={{ display:"flex", color:"#9aa0a6", transform: open?"none":"rotate(-90deg)", transition:"transform .15s" }}>
-          <Icon d={I.caret} size={18}/>
-        </span>
-        <span style={{ fontWeight:600, fontSize:14.5, color:"var(--ink)" }}>{fmtDate(g.d)}</span>
-        <span style={{ fontSize:12.5, color:"var(--faint)" }}>{fmtThaiLong(g.d)}</span>
-        <span style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-          <span style={{ fontSize:12, color:"var(--faint)" }}>{g.rows.length} รายการ</span>
-          {(() => {
-            const gLive = g.rows.filter(r=>r.type==="กุ้งเป็น").reduce((s,r)=>s+r.qty,0);
-            const gDong = g.rows.filter(r=>r.type==="กุ้งดอง").reduce((s,r)=>s+r.qty,0);
-            return (<>
-              {gLive > 0 && <span style={{ display:"flex", alignItems:"center", gap:4, fontSize:12.5, color:"var(--ink-2)", background:"#fff3f5", border:"1px solid #f9cdd5", borderRadius:16, padding:"2px 10px" }}>
-                <span style={{ width:7, height:7, borderRadius:"50%", background:"var(--live)", display:"inline-block" }}/>
-                <span>เป็น</span><b style={{ fontWeight:600 }}>{nf1(gLive/1000)}</b><span style={{ color:"var(--faint)" }}>ต.</span>
-              </span>}
-              {gDong > 0 && <span style={{ display:"flex", alignItems:"center", gap:4, fontSize:12.5, color:"var(--ink-2)", background:"#f3f4f5", border:"1px solid var(--line)", borderRadius:16, padding:"2px 10px" }}>
-                <span style={{ width:7, height:7, borderRadius:"50%", background:"var(--dong)", display:"inline-block" }}/>
-                <span>ดอง</span><b style={{ fontWeight:600 }}>{nf1(gDong/1000)}</b><span style={{ color:"var(--faint)" }}>ต.</span>
-              </span>}
-            </>);
-          })()}
-          <span style={{
-            background:"#fff", border:"1px solid var(--line)", borderRadius:20,
-            padding:"3px 12px", fontSize:13, fontWeight:600, color:"var(--ink-2)"
-          }}>{nf(g.total)} Kg</span>
-        </span>
-      </div>
-      {open && g.rows.map((r,i) => <Row key={i} r={r}/>)}
-    </div>
-  );
-}
-
-function Row({ r }) {
-  const [hov, setHov] = useState(false);
-  return (
-    <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        display:"grid", gridTemplateColumns:GRID, alignItems:"center",
-        padding:"0 18px", minHeight:50,
-        borderBottom:"1px solid var(--line-soft)",
-        background: hov ? "var(--hover)" : "#fff",
-        transition:"background .1s", fontSize:14
-      }}
-    >
-      <div style={{ color:"var(--muted)", fontSize:13.5, whiteSpace:"nowrap" }}>{fmtDate(r.d)}</div>
-      <div style={{ display:"flex", alignItems:"center", gap:9, minWidth:0, paddingRight:12 }}>
-        <span style={{ width:7, height:7, borderRadius:"50%", background:"#3c4043", flex:"0 0 auto" }}/>
-        <span style={{ whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", color:"var(--ink)", fontWeight:500 }} title={r.bill}>
-          {r.bill||"—"}
-        </span>
-      </div>
-      <div style={{ paddingRight:12, minWidth:0 }}><TypeCell t={r.type} raw={r.rawType}/></div>
-      <div><SpeciesCell sp={r.species}/></div>
-      <div style={{ textAlign:"right", paddingRight:6, color:"var(--ink-2)" }}>{r.size ? nf(r.size) : "—"}</div>
-      <div style={{ textAlign:"right", paddingRight:6, fontWeight:600, color:"var(--ink)" }}>{nf(r.qty)}</div>
-      <div style={{ textAlign:"right", paddingRight:6, color:"var(--ink-2)" }}>
-        {r.price ? <span><span style={{ color:"var(--faint)" }}>฿</span>{nf(r.price)}</span> : "—"}
-      </div>
-      <div style={{ paddingLeft:8, color:"var(--muted)", fontSize:13, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }} title={r.remark}>
-        {r.remark || ""}
-      </div>
-    </div>
-  );
-}
-
-/* ---------- widgets ---------- */
-function Card({ label, sub, children, pad }) {
-  return (
-    <div style={{
-      background:"#fff", border:"1px solid var(--line)", borderRadius:12,
-      boxShadow:"var(--shadow)", padding: pad ? "16px 18px 14px" : "15px 17px",
-      animation:"fadeUp .25s ease both"
-    }}>
-      <div style={{ fontSize:12.5, fontWeight:600, color:"var(--muted)", letterSpacing:.2 }}>{label}</div>
-      <div style={{ marginTop: pad ? 10 : 8 }}>{children}</div>
-      {sub && <div style={{ fontSize:12, color:"var(--faint)", marginTop:8 }}>{sub}</div>}
-    </div>
-  );
-}
-
-function Big({ v, unit, prefix }) {
-  return (
-    <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
-      {prefix && <span style={{ fontSize:20, fontWeight:500, color:"var(--faint)" }}>{prefix}</span>}
-      <span style={{ fontSize:28, fontWeight:600, color:"var(--ink)", lineHeight:1, fontFamily:"'IBM Plex Sans',sans-serif" }}>{v}</span>
-      <span style={{ fontSize:13.5, color:"var(--faint)", fontWeight:500 }}>{unit}</span>
-    </div>
-  );
-}
-
-function SplitBar({ live, dong }) {
-  const t = live + dong || 1;
-  const lp = live / t * 100;
-  return (
-    <div>
-      <div style={{ display:"flex", height:30, borderRadius:7, overflow:"hidden", border:"1px solid var(--line-soft)" }}>
-        <div style={{ width:lp+"%", background:"var(--live)", minWidth: live ? 2 : 0 }}/>
-        <div style={{ flex:1, background:"var(--dong)" }}/>
-      </div>
-      <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:12.5 }}>
-        <span style={{ display:"flex", alignItems:"center", gap:6, color:"var(--ink-2)" }}>
-          <Dot color="var(--live)" size={8}/>กุ้งเป็น&nbsp;<b style={{ fontWeight:600 }}>{nf(live)}</b>&nbsp;
-          <span style={{ color:"var(--faint)" }}>({Math.round(lp)}%)</span>
-        </span>
-        <span style={{ display:"flex", alignItems:"center", gap:6, color:"var(--ink-2)" }}>
-          <Dot color="var(--dong)" size={8}/>กุ้งดอง&nbsp;<b style={{ fontWeight:600 }}>{nf(dong)}</b>
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function Trend({ trend, max }) {
-  if (!trend.length) return <div style={{ color:"var(--faint)", fontSize:13, padding:"10px 0" }}>—</div>;
-  return (
-    <div style={{ display:"flex", alignItems:"flex-end", gap: trend.length>20 ? 3 : 6, height:96 }}>
-      {trend.map((t,i) =>
-        <div key={i} title={`${fmtDate(t.d)} · ${nf(t.total)} Kg`}
-          style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:0, color:"rgb(49,141,219)" }}>
-          <div style={{ width:"100%", maxWidth:26, height:88, display:"flex", flexDirection:"column", justifyContent:"flex-end" }}>
-            <div style={{ height: t.live/max*100+"%", background:"var(--live)", borderRadius:"3px 3px 0 0" }}/>
-            <div style={{ height: t.dong/max*100+"%", background:"var(--dong)" }}/>
-          </div>
-          <div style={{ fontSize:9.5, color:"var(--faint)", whiteSpace:"nowrap" }}>{parseD(t.d).getDate()}</div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Segmented({ options, value, onChange }) {
-  return (
-    <div style={{ display:"flex", background:"#eef0f2", borderRadius:9, padding:3, gap:2 }}>
-      {options.map(o =>
-        <button key={o.v} onClick={() => onChange(o.v)} style={{
-          border:"none", borderRadius:7, padding:"6px 14px", fontSize:13.5, fontWeight:500,
-          background: value===o.v ? "#fff" : "transparent",
-          color:      value===o.v ? "var(--ink)" : "var(--muted)",
-          boxShadow:  value===o.v ? "0 1px 2px rgba(60,64,67,.18)" : "none"
-        }}>{o.l}</button>
-      )}
-    </div>
-  );
-}
-
-function ChipRow({ chips, value, onChange }) {
-  return (
-    <div style={{ display:"flex", gap:6 }}>
-      {chips.map(c =>
-        <button key={c.v} onClick={() => onChange(c.v)} style={typeChip(value===c.v)}>{c.l}</button>
-      )}
-    </div>
-  );
-}
-
-/* ─── MonthNav component ─── */
-function MonthNav({ selMonth, setSelMonth, rmData }) {
-  /* build list of available months from data */
-  const months = useMemo(() => {
-    const s = new Set(rmData.map(r => r.d.slice(0,7)));
-    return [...s].sort();
-  }, [rmData]);
-
-  const idx   = months.indexOf(selMonth);
-  const prev  = months[idx - 1] || null;
-  const next  = months[idx + 1] || null;
-
-  function fmtMonth(ym) {
-    const [y, m] = ym.split("-").map(Number);
-    return TH_MONTHS[m - 1] + " " + (y + 543);
-  }
-  /* monthly summary for chips */
-  const summary = useMemo(() => {
-    const map = {};
-    months.forEach(ym => {
-      const rows = rmData.filter(r => r.d.slice(0,7) === ym);
-      map[ym] = rows.reduce((s,r) => s + r.qty, 0);
-    });
-    return map;
-  }, [rmData, months]);
-
-  return (
-    <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-      {/* prev/next arrows */}
-      <button
-        onClick={() => prev && setSelMonth(prev)}
-        disabled={!prev}
-        style={{ border:"1px solid var(--line)", background:"#fff", borderRadius:8, width:32, height:32,
-                 cursor:prev?"pointer":"default", opacity:prev?1:.35, fontSize:16, color:"var(--ink-2)" }}
-      >‹</button>
-
-      {/* month dropdown */}
-      <select
-        value={selMonth}
-        onChange={e => setSelMonth(e.target.value)}
-        style={{ border:"1px solid var(--line)", borderRadius:8, padding:"5px 10px",
-                 fontSize:14, fontWeight:600, color:"var(--ink-2)", background:"#fff",
-                 cursor:"pointer", height:32 }}
-      >
-        {months.map(ym => (
-          <option key={ym} value={ym}>
-            {fmtMonth(ym)} — {nf1(summary[ym]/1000)} ต.
-          </option>
-        ))}
+    <div className="grp-ctl">
+      <button className="nav-arrow" onClick={() => prev && setSelMonth(prev)} disabled={!prev}><Icon d={I.chevL} size={16}/></button>
+      <select className="ctl" value={selMonth} onChange={e => setSelMonth(e.target.value)}>
+        {months.slice().reverse().map(ym => <option key={ym} value={ym}>{thMonth(ym)} — {nf1(summary[ym]/1000)} ตัน</option>)}
       </select>
-
-      <button
-        onClick={() => next && setSelMonth(next)}
-        disabled={!next}
-        style={{ border:"1px solid var(--line)", background:"#fff", borderRadius:8, width:32, height:32,
-                 cursor:next?"pointer":"default", opacity:next?1:.35, fontSize:16, color:"var(--ink-2)" }}
-      >›</button>
-
-      {/* current month badge */}
-      <span style={{ fontSize:12.5, color:"var(--faint)", marginLeft:4 }}>
-        {months.length} เดือน · ข้อมูลล่าสุด {months.length ? fmtMonth(months[months.length-1]) : "–"}
-      </span>
+      <button className="nav-arrow" onClick={() => next && setSelMonth(next)} disabled={!next}><Icon d={I.chevR} size={16}/></button>
+      <span className="hint">{months.length} เดือนในระบบ</span>
     </div>
   );
 }
 
 function DateRangeFilter({ from, to, setFrom, setTo, minDate, latest }) {
-  const inp = {
-    border:"1px solid var(--line)", borderRadius:8, padding:"0 8px", height:32,
-    fontSize:13.5, fontWeight:600, color:"var(--ink-2)", background:"#fff", fontFamily:"inherit"
-  };
   const presets = [
-    { l:"วันล่าสุด", f:latest,                 t:latest },
-    { l:"7 วัน",    f:addDays(latest, -6),     t:latest },
-    { l:"15 วัน",   f:addDays(latest, -14),    t:latest },
-    { l:"เดือนนี้",  f:latest.slice(0,7)+"-01", t:latest },
+    { l:"วันล่าสุด", f:latest,                  t:latest },
+    { l:"7 วัน",    f:addDays(latest, -6),      t:latest },
+    { l:"15 วัน",   f:addDays(latest, -14),     t:latest },
+    { l:"เดือนนี้",  f:latest.slice(0,7)+"-01",  t:latest },
   ];
-  const lo = from && to && from > to ? to : from;
-  const hi = from && to && from > to ? from : to;
-  const nDays = lo && hi ? Math.round((parseD(hi) - parseD(lo)) / 86400000) + 1 : 0;
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-      <span style={{ fontSize:13, color:"var(--muted)" }}>จาก</span>
-      <input type="date" value={from} min={minDate} max={latest}
-        onChange={e => setFrom(e.target.value)} style={inp}/>
-      <span style={{ fontSize:13, color:"var(--muted)" }}>ถึง</span>
-      <input type="date" value={to} min={minDate} max={latest}
-        onChange={e => setTo(e.target.value)} style={inp}/>
-      <button onClick={() => setTo(from)} disabled={!from} title="ดูเฉพาะวันที่เลือกในช่อง 'จาก'"
-        style={typeChip(from && from === to)}>วันเดียว</button>
-      {presets.map(p =>
-        <button key={p.l} onClick={() => { setFrom(p.f); setTo(p.t); }}
-          style={typeChip(from === p.f && to === p.t)}>{p.l}</button>
-      )}
-      <span style={{ fontSize:12.5, color:"var(--faint)", marginLeft:2 }}>
-        {nDays > 0
-          ? (nDays === 1 ? fmtThaiLong(lo) : `${fmtDate(lo)} – ${fmtDate(hi)} · ${nDays} วัน`)
-          : "เลือกวันที่"}
-      </span>
+    <div className="grp-ctl">
+      <span className="hint">จาก</span>
+      <input className="ctl" type="date" value={from} min={minDate} max={latest} onChange={e => setFrom(e.target.value)}/>
+      <span className="hint">ถึง</span>
+      <input className="ctl" type="date" value={to} min={minDate} max={latest} onChange={e => setTo(e.target.value)}/>
+      <button className={"pill" + (from && from === to ? " on" : "")} onClick={() => setTo(from)} disabled={!from}>วันเดียว</button>
+      {presets.map(p => <button key={p.l} className={"pill" + (from === p.f && to === p.t ? " on" : "")} onClick={() => { setFrom(p.f); setTo(p.t); }}>{p.l}</button>)}
     </div>
   );
 }
 
 function DayNav({ day, dateInfo, onPick, onPrev, onNext, prevDisabled, nextDisabled, latest }) {
   const [open, setOpen] = useState(false);
-  const has = dateInfo[day] > 0;
   return (
-    <div style={{
-      position:"relative", display:"flex", alignItems:"center", gap:4,
-      background:"#fff", border:"1px solid var(--line)", borderRadius:9, padding:"3px 4px"
-    }}>
-      <button onClick={onPrev} disabled={prevDisabled} style={navBtn(prevDisabled)} title="วันก่อนหน้าที่มีข้อมูล">
-        <Icon d={I.chevL} size={18}/>
-      </button>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          display:"flex", alignItems:"center", gap:8, minWidth:172, justifyContent:"center",
-          border:"none", background: open ? "#f1f3f4" : "transparent",
-          borderRadius:7, height:30, padding:"0 8px",
-          color:"var(--ink)", fontWeight:600, fontSize:14
-        }}
-      >
-        <Icon d={I.cal} size={16}/>
-        <span>{fmtDate(day)}</span>
-        <span style={{ display:"flex", color:"#9aa0a6", transform: open?"rotate(180deg)":"none", transition:"transform .15s" }}>
-          <Icon d={I.caret} size={15}/>
-        </span>
-      </button>
-      <button onClick={onNext} disabled={nextDisabled} style={navBtn(nextDisabled)} title="วันถัดไปที่มีข้อมูล">
-        <Icon d={I.chevR} size={18}/>
-      </button>
-      {!has && <span style={{ fontSize:11.5, color:"var(--faint)", padding:"0 6px" }}>ไม่มีข้อมูล</span>}
-      {open && <>
-        <div onClick={() => setOpen(false)} style={{ position:"fixed", inset:0, zIndex:40 }}/>
-        <Calendar value={day} dateInfo={dateInfo} latest={latest} onChange={d => { onPick(d); setOpen(false); }}/>
-      </>}
+    <div className="grp-ctl">
+      <div className="daynav">
+        <button className="ghost" onClick={onPrev} disabled={prevDisabled} title="วันก่อนหน้าที่มีข้อมูล"><Icon d={I.chevL} size={17}/></button>
+        <button className={"pick" + (open ? " open" : "")} onClick={() => setOpen(o => !o)}>
+          <Icon d={I.cal} size={15}/><span>{thLong(day)}</span>
+        </button>
+        <button className="ghost" onClick={onNext} disabled={nextDisabled} title="วันถัดไปที่มีข้อมูล"><Icon d={I.chevR} size={17}/></button>
+        {open && <>
+          <div onClick={() => setOpen(false)} style={{ position:"fixed", inset:0, zIndex:40 }}/>
+          <Calendar value={day} dateInfo={dateInfo} latest={latest} onChange={d => { onPick(d); setOpen(false); }}/>
+        </>}
+      </div>
+      {!(dateInfo[day] > 0) && <span className="hint">ไม่มีข้อมูลวันนี้</span>}
     </div>
   );
 }
@@ -1142,110 +888,361 @@ function Calendar({ value, dateInfo, latest, onChange }) {
   const [vm, setVm] = useState({ y: sel.getFullYear(), m: sel.getMonth() });
   const pad = n => String(n).padStart(2,"0");
   const startDow = new Date(vm.y, vm.m, 1).getDay();
-  const days     = new Date(vm.y, vm.m+1, 0).getDate();
+  const nDays = new Date(vm.y, vm.m+1, 0).getDate();
   const cells = [];
-  for (let i=0; i<startDow; i++) cells.push(null);
-  for (let d=1; d<=days; d++) cells.push(d);
-  while (cells.length%7 !== 0) cells.push(null);
-  const dow = ["อา","จ","อ","พ","พฤ","ศ","ส"];
-  const stepMonth = delta => setVm(v => {
-    let m=v.m+delta, y=v.y;
-    if (m<0)  { m=11; y--; }
-    if (m>11) { m=0;  y++; }
-    return { y, m };
-  });
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  for (let d = 1; d <= nDays; d++) cells.push(d);
+  const step = delta => setVm(v => { let m = v.m + delta, y = v.y; if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; } return { y, m }; });
   return (
-    <div style={{
-      position:"absolute", top:"calc(100% + 8px)", left:0, zIndex:50,
-      background:"#fff", border:"1px solid var(--line)", borderRadius:12,
-      boxShadow:"0 8px 28px rgba(60,64,67,.22)", padding:14, width:300,
-      animation:"fadeUp .15s ease both"
-    }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
-        <button onClick={() => stepMonth(-1)} style={navBtn(false)}><Icon d={I.chevL} size={18}/></button>
-        <div style={{ fontWeight:600, fontSize:15, color:"var(--ink)" }}>{TH_MONTHS[vm.m]} {vm.y}</div>
-        <button onClick={() => stepMonth(1)}  style={navBtn(false)}><Icon d={I.chevR} size={18}/></button>
+    <div className="cal">
+      <div className="cal-h">
+        <button className="ghost" onClick={() => step(-1)}><Icon d={I.chevL} size={17}/></button>
+        <span>{TH_MONTHS[vm.m]} {vm.y + 543}</span>
+        <button className="ghost" onClick={() => step(1)}><Icon d={I.chevR} size={17}/></button>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2, marginBottom:4 }}>
-        {dow.map((d,i) =>
-          <div key={i} style={{
-            textAlign:"center", fontSize:11.5, fontWeight:600, padding:"2px 0",
-            color: i===0 ? "#d05a5a" : "var(--faint)"
-          }}>{d}</div>
-        )}
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2 }}>
+      <div className="cal-g" style={{ marginBottom: 4 }}>{TH_DOW_S.map((d,i) => <div key={i} className="cal-dow">{d}</div>)}</div>
+      <div className="cal-g">
         {cells.map((d,i) => {
-          if (d===null) return <div key={i}/>;
-          const ds    = `${vm.y}-${pad(vm.m+1)}-${pad(d)}`;
-          const has   = dateInfo[ds] > 0;
-          const isSel = ds === value;
-          const isSun = (startDow+d-1)%7 === 0;
-          return (
-            <button key={i}
-              onClick={() => onChange(ds)}
-              title={has ? `${nf(dateInfo[ds])} Kg` : "ไม่มีข้อมูล"}
-              style={{
-                position:"relative", height:36, border:"none", borderRadius:8,
-                cursor:"pointer", fontSize:13.5,
-                fontWeight:  isSel ? 700 : has ? 600 : 400,
-                background:  isSel ? "var(--blue)" : has ? "#eef4ff" : "transparent",
-                color:       isSel ? "#fff" : has ? "var(--blue-dark)" : isSun ? "#d4a0a0" : "#c0c4c9"
-              }}
-            >
-              {d}
-              {has && !isSel &&
-                <span style={{
-                  position:"absolute", bottom:5, left:"50%", transform:"translateX(-50%)",
-                  width:4, height:4, borderRadius:"50%", background:"var(--blue)"
-                }}/>
-              }
-            </button>
-          );
+          if (d === null) return <div key={i}/>;
+          const ds = `${vm.y}-${pad(vm.m+1)}-${pad(d)}`;
+          const has = dateInfo[ds] > 0;
+          return <button key={i} className={"cal-d" + (has ? " has" : "") + (ds === value ? " sel" : "")}
+            onClick={() => onChange(ds)} title={has ? `${nf(dateInfo[ds])} Kg` : "ไม่มีข้อมูล"}>{d}</button>;
         })}
       </div>
-      <div style={{
-        display:"flex", justifyContent:"space-between", alignItems:"center",
-        marginTop:10, paddingTop:10, borderTop:"1px solid var(--line-soft)"
-      }}>
-        <span style={{ fontSize:11.5, color:"var(--faint)", display:"flex", alignItems:"center", gap:5 }}>
-          <span style={{ width:6, height:6, borderRadius:"50%", background:"var(--blue)" }}/>วันที่มีข้อมูล
-        </span>
-        <button
-          onClick={() => onChange(latest)}
-          style={{ border:"none", background:"#f1f3f4", borderRadius:7, padding:"5px 12px", fontSize:12.5, fontWeight:600, color:"var(--blue-dark)" }}
-        >วันล่าสุด</button>
+      <div className="cal-f">
+        <span>● วันที่มีข้อมูล</span>
+        <button className="pill" style={{ height: 28 }} onClick={() => onChange(latest)}>วันล่าสุด</button>
       </div>
     </div>
   );
 }
 
-/* ---------- style helpers ---------- */
-function navBtn(dis) {
-  return {
-    width:30, height:30, border:"none", background:"transparent", borderRadius:7,
-    display:"flex", alignItems:"center", justifyContent:"center",
-    color: dis ? "#c4c8cd" : "var(--muted)"
-  };
+/* ---------- table ---------- */
+function GroupRows({ g, closed, toggle }) {
+  const dong = g.total - g.live;
+  const maxSize = 150;
+  return <>
+    <tr className={"grp" + (closed ? " closed" : "")} onClick={toggle}>
+      <td colSpan={8}>
+        <div className="grp-in">
+          <span className="chev"><Icon d={I.caret} size={16}/></span>
+          <span className="grp-date">{thDate(g.d)}</span>
+          <span className="grp-th">{TH_DOW[parseD(g.d).getDay()]} · {g.rows.length} รายการ</span>
+          <span className="grp-r">
+            {g.live > 0 && <span className="tag live"><i/>เป็น {nf1(g.live/1000)} t</span>}
+            {dong > 0 && <span className="tag dong"><i/>ดอง {nf1(dong/1000)} t</span>}
+            <span className="tag tot num">{nf(g.total)} Kg</span>
+          </span>
+        </div>
+      </td>
+    </tr>
+    {!closed && g.rows.map((r,i) => {
+      const [name, loc] = splitBill(r.bill);
+      const extra = r.rawType && r.rawType !== r.type ? r.rawType.replace("กุ้งเป็น","").replace("กุ้งดอง","").replace("BROKER","").trim() : "";
+      return (
+        <tr className="it" key={i}>
+          <td className="c-date" style={{ color:"var(--muted)" }}>{thShort(r.d)}</td>
+          <td className="c-supp"><span className="supp" title={r.bill}>{name || "—"}{(loc || r.prov) && <small>{loc || r.prov}</small>}</span></td>
+          <td className="c-type"><span className={"tag " + (isLive(r) ? "live" : "dong")}><i/>{r.type}</span>{extra && <span className="raw">{extra}</span>}</td>
+          <td className="c-sp">{r.species ? <span className="sp"><i style={{ background: spColor(r.species) }}/>{r.species}</span> : <span style={{ color:"var(--faint)" }}>ไม่ระบุ</span>}</td>
+          <td className="r c-size num"><span className="sizebar">{r.size > 0 && <span className="tk"><div style={{ width: Math.min(100, r.size / maxSize * 100) + "%" }}/></span>}{r.size > 0 ? nf(r.size) : "–"}</span></td>
+          <td className="r c-qty num qty">{nf(r.qty)}</td>
+          <td className="r c-price num price">{r.price > 0 ? <><span>฿</span>{nf(r.price)}</> : "–"}</td>
+          <td className="c-remark remark" title={r.remark}>{r.remark || ""}</td>
+        </tr>
+      );
+    })}
+  </>;
 }
-function typeChip(active) {
-  return {
-    display:"flex", alignItems:"center", gap:7,
-    border:"1px solid "+(active ? "var(--blue)" : "var(--line)"),
-    background: active ? "#e8f0fe" : "#fff",
-    color:      active ? "var(--blue-dark)" : "var(--ink-2)",
-    borderRadius:20, padding:"6px 14px", fontSize:13.5, fontWeight:500, transition:"all .12s"
-  };
+
+function exportCsv(rows, name) {
+  const head = ["วันที่","ชื่อเปิดบิล","ประเภท","ประเภท(ต้นฉบับ)","ชนิดกุ้ง","ขนาด(ตัว/Kg)","ปริมาณ(Kg)","ราคา(฿/Kg)","จังหวัด","หมายเหตุ"];
+  const q = v => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  const lines = [head.join(",")].concat(rows.map(r => [r.d, r.bill, r.type, r.rawType, r.species, r.size, r.qty, r.price, r.prov, r.remark].map(q).join(",")));
+  const blob = new Blob(["﻿" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
-const btnGhost = {
-  width:38, height:38, border:"1px solid var(--line)", background:"#fff",
-  borderRadius:9, display:"flex", alignItems:"center", justifyContent:"center", color:"var(--muted)"
-};
-const btnPrimary = {
-  display:"flex", alignItems:"center", gap:6, height:38, padding:"0 16px 0 12px",
-  border:"none", borderRadius:9, background:"var(--blue)", color:"#fff",
-  fontSize:14.5, fontWeight:600, boxShadow:"0 1px 2px rgba(26,115,232,.4)"
-};
+
+/* ---------- main ---------- */
+const PAGE_DAYS = 30;
+
+function App() {
+  const [query,    setQuery]    = useState("");
+  const [range,    setRange]    = useState(30);
+  const [type,     setType]     = useState("all");
+  const [scope,    setScope]    = useState("range");
+  const [rmData,   setRmData]   = useState(_DATA);
+  const [latest,   setLatest]   = useState(() => maxDateOf(_DATA));
+  const [selDate,  setSelDate]  = useState(() => maxDateOf(_DATA));
+  const [selMonth, setSelMonth] = useState(() => maxDateOf(_DATA).slice(0,7));
+  const [dFrom,    setDFrom]    = useState(() => addDays(maxDateOf(_DATA), -6));
+  const [dTo,      setDTo]      = useState(() => maxDateOf(_DATA));
+  const [theme,    setTheme]    = useState(getTheme);
+  const [closed,   setClosed]   = useState(() => new Set());
+  const [shown,    setShown]    = useState(PAGE_DAYS);
+  const [meta,     setMeta]     = useState(window.__KST_META || {});
+  const latestRef = useRef(latest);
+
+  const toggleTheme = () => { const t = theme === "dark" ? "light" : "dark"; setThemeAttr(t); setTheme(t); };
+
+  /* Listen for live data from OneDrive/Graph */
+  useEffect(() => {
+    function onReady() {
+      setMeta({ ...(window.__KST_META || {}) });
+      const fresh = (window.RM_DATA || []).slice();
+      if (!fresh.length) return;
+      const mx = maxDateOf(fresh), old = latestRef.current;
+      latestRef.current = mx;
+      setRmData(fresh);
+      setLatest(mx);
+      /* ถ้าผู้ใช้ยังอยู่ที่วัน/เดือนล่าสุด → เลื่อนตามข้อมูลใหม่ */
+      setSelDate(v => v === old ? mx : v);
+      setSelMonth(v => v === old.slice(0,7) ? mx.slice(0,7) : v);
+      setDTo(v => v === old ? mx : v);
+    }
+    window.addEventListener("kst:data-ready", onReady);
+    /* Auto-refresh ทุก 3 นาที + refresh เมื่อกลับมาที่แท็บ */
+    const timer = setInterval(() => kstFetchData(false), 3 * 60 * 1000);
+    const onVis = () => { if (document.visibilityState === "visible") kstFetchData(false); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { window.removeEventListener("kst:data-ready", onReady); clearInterval(timer); document.removeEventListener("visibilitychange", onVis); };
+  }, []);
+
+  useEffect(() => { setShown(PAGE_DAYS); }, [scope, range, type, query, selDate, selMonth, dFrom, dTo]);
+
+  const dateInfo = useMemo(() => {
+    const m = {};
+    rmData.forEach(r => { m[r.d] = (m[r.d] || 0) + r.qty; });
+    return m;
+  }, [rmData]);
+  const allDatesAsc = useMemo(() => Object.keys(dateInfo).sort(), [dateInfo]);
+  const minDate = allDatesAsc[0] || latest;
+  const prevDate = useMemo(() => { let b = null; for (const d of allDatesAsc) { if (d < selDate) b = d; else break; } return b; }, [allDatesAsc, selDate]);
+  const nextDate = useMemo(() => { for (const d of allDatesAsc) { if (d > selDate) return d; } return null; }, [allDatesAsc, selDate]);
+
+  /* current window + comparison window */
+  const win = useMemo(() => {
+    if (scope === "day")   return { lo: selDate, hi: selDate, prev: prevDate ? [prevDate, prevDate] : null, vs: "vs วันก่อนหน้า" };
+    if (scope === "month") {
+      const [lo,hi] = monthBounds(selMonth);
+      const [plo,phi] = monthBounds(prevMonth(selMonth));
+      /* เดือนปัจจุบันยังไม่ครบ → เทียบกับวันที่ 1..N ของเดือนก่อน */
+      if (latest >= lo && latest < hi) {
+        const pEnd = plo.slice(0,8) + String(Math.min(parseD(latest).getDate(), parseD(phi).getDate())).padStart(2,"0");
+        return { lo, hi, prev: [plo, pEnd], vs: "vs ช่วงเดียวกันเดือนก่อน" };
+      }
+      return { lo, hi, prev: [plo, phi], vs: "vs เดือนก่อน" };
+    }
+    if (scope === "custom") {
+      let lo = dFrom || minDate, hi = dTo || latest; if (lo > hi) [lo, hi] = [hi, lo];
+      const n = daysBetween(lo, hi);
+      return { lo, hi, prev: [addDays(lo, -n), addDays(lo, -1)], vs: `vs ${n} วันก่อนหน้า` };
+    }
+    if (range > 0) { const lo = addDays(latest, -(range - 1)); return { lo, hi: latest, prev: [addDays(lo, -range), addDays(lo, -1)], vs: `vs ${range} วันก่อน` }; }
+    return { lo: minDate, hi: latest, prev: null, vs: null };
+  }, [scope, selDate, prevDate, selMonth, dFrom, dTo, range, latest, minDate]);
+
+  const applyFilters = (lo, hi) => {
+    let rows = rmData.filter(r => r.d >= lo && r.d <= hi);
+    if (type !== "all") rows = rows.filter(r => r.type === type);
+    const q = query.trim().toLowerCase();
+    if (q) rows = rows.filter(r => (r.bill + " " + r.remark + " " + r.prov + " " + (r.species || "") + " " + (r.rawType || "")).toLowerCase().includes(q));
+    return rows;
+  };
+  const filtered = useMemo(() => applyFilters(win.lo, win.hi).sort((a,b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0), [rmData, win, type, query]);
+  const prevRows = useMemo(() => win.prev ? applyFilters(win.prev[0], win.prev[1]) : [], [rmData, win, type, query]);
+
+  const groups = useMemo(() => {
+    const m = new Map();
+    filtered.forEach(r => { if (!m.has(r.d)) m.set(r.d, []); m.get(r.d).push(r); });
+    return [...m.entries()].sort((a,b) => b[0].localeCompare(a[0])).map(([d, rows]) => ({
+      d, rows, count: rows.length, total: sumQty(rows), live: sumQty(rows.filter(isLive)),
+      price: wAvg(rows, "price"), size: wAvg(rows, "size")
+    }));
+  }, [filtered]);
+
+  const stats = useMemo(() => {
+    const mk = rows => {
+      const total = sumQty(rows), live = sumQty(rows.filter(isLive));
+      const prices = rows.filter(r => r.price > 0 && r.qty > 0).map(r => r.price);
+      const sizes  = rows.filter(r => r.size > 0 && r.qty > 0).map(r => r.size);
+      return {
+        total, live, dong: total - live, count: rows.length, days: new Set(rows.map(r => r.d)).size,
+        avg: wAvg(rows, "price"), pmin: prices.length ? Math.min(...prices) : 0, pmax: prices.length ? Math.max(...prices) : 0,
+        sz: wAvg(rows, "size"), szMin: sizes.length ? Math.min(...sizes) : 0, szMax: sizes.length ? Math.max(...sizes) : 0
+      };
+    };
+    return { cur: mk(filtered), prev: mk(prevRows) };
+  }, [filtered, prevRows]);
+  const s = stats.cur, p = stats.prev;
+
+  /* chart: chronological, max 60 bars */
+  const chron = useMemo(() => groups.slice(0, 60).reverse(), [groups]);
+  /* chart in day mode → show 30 data-days up to selected day for context */
+  const chartDays = useMemo(() => {
+    if (scope !== "day") return chron;
+    const lo = addDays(selDate, -29);
+    let rows = rmData.filter(r => r.d >= lo && r.d <= selDate);
+    if (type !== "all") rows = rows.filter(r => r.type === type);
+    const m = new Map(); rows.forEach(r => { if (!m.has(r.d)) m.set(r.d, []); m.get(r.d).push(r); });
+    return [...m.entries()].sort((a,b) => a[0].localeCompare(b[0])).map(([d, rs]) => ({ d, count: rs.length, total: sumQty(rs), live: sumQty(rs.filter(isLive)), price: wAvg(rs, "price") }));
+  }, [scope, chron, rmData, selDate, type]);
+
+  const species = useMemo(() => {
+    const m = {}; filtered.forEach(r => { const k = r.species || "ไม่ระบุ"; m[k] = (m[k] || 0) + r.qty; });
+    return Object.entries(m).sort((a,b) => b[1] - a[1]);
+  }, [filtered]);
+  const topSup = useMemo(() => {
+    const m = {}; filtered.forEach(r => { const k = supplierKey(r.bill); if (!m[k]) m[k] = { qty: 0, n: 0 }; m[k].qty += r.qty; m[k].n++; });
+    return Object.entries(m).sort((a,b) => b[1].qty - a[1].qty).slice(0, 5);
+  }, [filtered]);
+
+  const rangeLabel = win.lo === win.hi ? thLong(win.lo) : `${thShort(win.lo)} – ${thDate(win.hi)}`;
+  const sp20 = chron.slice(-20);
+  const tot = s.total || 1;
+  const toggle = d => setClosed(c => { const n = new Set(c); n.has(d) ? n.delete(d) : n.add(d); return n; });
+
+  const rangeChips = [{v:7,l:"7 วัน"},{v:30,l:"30 วัน"},{v:90,l:"90 วัน"},{v:365,l:"1 ปี"},{v:0,l:"ทั้งหมด"}];
+  const typeChips = [{v:"all",l:"ทั้งหมด"},{v:"กุ้งเป็น",l:"กุ้งเป็น",c:"var(--live)"},{v:"กุ้งดอง",l:"กุ้งดอง",c:"var(--dong)"}];
+
+  return (
+    <>
+      <TopBar query={query} setQuery={setQuery} theme={theme} toggleTheme={toggleTheme}/>
+      <main className="page">
+        <div className="head">
+          <div>
+            <div className="eyebrow">
+              {meta.live ? <span className={"chip" + (meta.src === "appsheet" ? "" : " warn")}>LIVE</span> : <span className="chip warn">สำรอง</span>}
+              <span>ข้อมูลล่าสุด {thLong(latest)}</span>
+            </div>
+            <h1>แจ้งวัตถุดิบเข้าประจำวัน</h1>
+          </div>
+          <button className="btn" onClick={() => exportCsv(filtered, `KST-RM_${win.lo}_${win.hi}.csv`)} disabled={!filtered.length} title="ดาวน์โหลดรายการตามตัวกรองเป็น CSV (เปิดด้วย Excel ได้)">
+            <Icon d={I.download} size={16}/><span>Export CSV</span>
+          </button>
+        </div>
+
+        <div className="filters">
+          <div className="seg">
+            {[{v:"range",l:"ช่วงเวลา"},{v:"month",l:"รายเดือน"},{v:"day",l:"รายวัน"},{v:"custom",l:"กำหนดวันที่"}].map(o =>
+              <button key={o.v} className={scope === o.v ? "on" : ""} onClick={() => setScope(o.v)}>{o.l}</button>)}
+          </div>
+          <div className="sep"/>
+          {scope === "range"
+            ? <div className="grp-ctl">{rangeChips.map(c => <button key={c.v} className={"pill" + (range === c.v ? " on" : "")} onClick={() => setRange(c.v)}>{c.l}</button>)}</div>
+            : scope === "month"
+            ? <MonthNav selMonth={selMonth} setSelMonth={setSelMonth} rmData={rmData}/>
+            : scope === "custom"
+            ? <DateRangeFilter from={dFrom} to={dTo} setFrom={setDFrom} setTo={setDTo} minDate={minDate} latest={latest}/>
+            : <DayNav day={selDate} dateInfo={dateInfo} onPick={setSelDate}
+                onPrev={() => prevDate && setSelDate(prevDate)} onNext={() => nextDate && setSelDate(nextDate)}
+                prevDisabled={!prevDate} nextDisabled={!nextDate} latest={latest}/>}
+          <div className="sep"/>
+          <div className="grp-ctl">
+            {typeChips.map(c => <button key={c.v} className={"pill" + (type === c.v ? " on" : "")} onClick={() => setType(c.v)}>{c.c && <i className="d" style={{ background: c.c }}/>}{c.l}</button>)}
+          </div>
+          <div className="spacer"/>
+          <div className="range-label">{rangeLabel}</div>
+        </div>
+
+        <section className="kpis">
+          <Kpi label="ปริมาณรวม" icon={I.box} color="var(--accent)" value={s.total >= 10000 ? nf1(s.total/1000) : nf(s.total)} unit={s.total >= 10000 ? "ตัน" : "Kg"}
+            spark={scope === "day" ? null : sp20.map(x => x.total)}
+            foot={<><Delta cur={s.total} prev={p.total} label={win.vs}/>{!(p.total && s.total && win.vs) && <span>{s.days} วัน · เฉลี่ย {nf(s.days ? s.total/s.days : 0)} Kg/วัน</span>}</>}/>
+          <Kpi label="รายการแจ้งเข้า" icon={I.list} color="var(--violet)" value={nf(s.count)} unit="รายการ"
+            spark={scope === "day" ? null : sp20.map(x => x.count)}
+            foot={<><Delta cur={s.count} prev={p.count} label={win.vs}/>{!(p.count && s.count && win.vs) && <span>{s.days} วันที่มีของเข้า</span>}</>}/>
+          <Kpi label="ขนาดเฉลี่ย (ถ่วงน้ำหนัก)" icon={I.ruler} color="var(--sea)" value={nf(s.sz)} unit="ตัว/Kg"
+            spark={scope === "day" ? null : sp20.map(x => x.size)}
+            foot={<span>ช่วง {nf(s.szMin)} – {nf(s.szMax)} ตัว/Kg</span>}/>
+          <Kpi label="ราคาเฉลี่ย (ถ่วงน้ำหนัก)" icon={I.baht} color="var(--gold)" prefix="฿" value={nf(s.avg)} unit="/Kg"
+            spark={scope === "day" ? null : sp20.map(x => x.price)}
+            foot={<><Delta cur={s.avg} prev={p.avg} invert label={win.vs}/><span>ช่วง ฿{nf(s.pmin)}–{nf(s.pmax)}</span></>}/>
+        </section>
+
+        <section className="row2">
+          <div className="card">
+            <div className="card-h">
+              <div>
+                <h3>ปริมาณวัตถุดิบเข้าต่อวัน</h3>
+                <div className="sub">{scope === "day" ? "30 วันย้อนหลังถึงวันที่เลือก" : `${s.days} วันที่มีของเข้า · เฉลี่ย ${nf(s.days ? s.total/s.days : 0)} Kg/วัน`}{chron.length < groups.length && scope !== "day" ? ` · แสดง ${chron.length} วันล่าสุด` : ""}</div>
+              </div>
+              <div className="legend"><span><i style={{ background:"var(--live)" }}/>กุ้งเป็น</span><span><i style={{ background:"var(--dong)" }}/>กุ้งดอง</span><span><i className="ln" style={{ background:"var(--gold)" }}/>ค่าเฉลี่ย 7 วัน</span></div>
+            </div>
+            <TrendChart days={chartDays}/>
+          </div>
+          <div className="card">
+            <div className="card-h"><div><h3>สัดส่วนวัตถุดิบ</h3><div className="sub">ตามช่วงที่เลือก</div></div></div>
+            <div className="donut-wrap">
+              <Donut live={s.live} dong={s.dong}/>
+              <div className="split-list">
+                <div className="split-item"><div className="t"><span><i style={{ background:"var(--live)" }}/>กุ้งเป็น</span><span className="num" style={{ color:"var(--muted)" }}>{Math.round(s.live/tot*100)}%</span></div><div className="v num">{nf(s.live)}<small>Kg</small></div></div>
+                <div className="split-item"><div className="t"><span><i style={{ background:"var(--dong)" }}/>กุ้งดอง</span><span className="num" style={{ color:"var(--muted)" }}>{s.total ? 100 - Math.round(s.live/tot*100) : 0}%</span></div><div className="v num">{nf(s.dong)}<small>Kg</small></div></div>
+              </div>
+            </div>
+            <div className="divider"/>
+            <div className="mini-h">ชนิดกุ้ง</div>
+            <div className="bars">
+              {species.length === 0 && <div className="hint">—</div>}
+              {species.map(([k,v]) =>
+                <div className="bar-row" key={k}>
+                  <div className="t"><span>{k}</span><span className="num">{nf1(v/1000)} t · {Math.round(v/tot*100)}%</span></div>
+                  <div className="track"><div style={{ width: v/tot*100 + "%", background: spColor(k === "ไม่ระบุ" ? null : k) }}/></div>
+                </div>)}
+            </div>
+          </div>
+        </section>
+
+        {topSup.length > 0 && <section className="card" style={{ marginBottom: 16 }}>
+          <div className="card-h"><div><h3>Top 5 Supplier</h3><div className="sub">เรียงตามปริมาณในช่วงที่เลือก</div></div></div>
+          <div className="tops">
+            {topSup.map(([k,v],i) =>
+              <div className="top-i" key={k}>
+                <div className="rk">{i+1}</div>
+                <div className="nm" title={k}>{k}</div>
+                <div className="vv num">{v.qty >= 1000 ? nf1(v.qty/1000) : nf(v.qty)}<small> {v.qty >= 1000 ? "ตัน" : "Kg"} · {Math.round(v.qty/tot*100)}% · {v.n} บิล</small></div>
+                <div className="track"><div style={{ width: v.qty/topSup[0][1].qty*100 + "%", background:"var(--accent)", opacity: 1 - i*.13 }}/></div>
+              </div>)}
+          </div>
+        </section>}
+
+        <section className="card tbl-card">
+          <div className="tbl-head">
+            <div><h3>รายการแจ้งเข้า</h3><div className="sub">{nf(s.count)} รายการ · {s.days} วัน{query ? ` · ค้นหา "${query}"` : ""}</div></div>
+            <div className="legend"><span><i className="rd" style={{ background:"var(--white-sp)" }}/>กุ้งขาว</span><span><i className="rd" style={{ background:"var(--black-sp)" }}/>กุ้งกุลาดำ</span><span><i className="rd" style={{ background:"var(--sea)" }}/>กุ้งทะเล</span></div>
+          </div>
+          <div className="scroll-x">
+            <table className="tbl">
+              <thead><tr><th>วันที่</th><th>ชื่อเปิดบิล</th><th>ประเภท</th><th>ชนิดวัตถุดิบ</th><th className="r">ขนาด (ตัว/Kg)</th><th className="r">ปริมาณ (Kg)</th><th className="r">ราคา</th><th>หมายเหตุ</th></tr></thead>
+              <tbody>
+                {groups.length === 0 && <tr><td colSpan={8} className="empty">ไม่พบรายการในช่วงที่เลือก</td></tr>}
+                {groups.slice(0, shown).map(g => <GroupRows key={g.d} g={g} closed={closed.has(g.d)} toggle={() => toggle(g.d)}/>)}
+              </tbody>
+            </table>
+          </div>
+          {groups.length > shown && <div className="more"><button className="pill" onClick={() => setShown(n => n + PAGE_DAYS)}>แสดงเพิ่มอีก {Math.min(PAGE_DAYS, groups.length - shown)} วัน (เหลือ {groups.length - shown} วัน)</button></div>}
+          <div className="tbl-foot">
+            <span className="legend">
+              <span>{nf(s.count)} รายการ · {s.days} วัน</span>
+              <span><i className="rd" style={{ background:"var(--live)" }}/>กุ้งเป็น <b className="num">{nf1(s.live/1000)} ตัน</b></span>
+              <span><i className="rd" style={{ background:"var(--dong)" }}/>กุ้งดอง <b className="num">{nf1(s.dong/1000)} ตัน</b></span>
+            </span>
+            <span>รวม <b className="num" style={{ color:"var(--ink)" }}>{nf(s.total)} Kg</b> ({nf1(s.total/1000)} ตัน)</span>
+          </div>
+        </section>
+
+        <div className="foot-note">
+          แหล่งข้อมูล:&nbsp;
+          <a href="https://ksthatyai365-my.sharepoint.com/personal/torsak_ar_kst-hatyai_com/Documents/ADD%20(5).xlsx?web=1" target="_blank" rel="noopener">ADD (5).xlsx</a>
+          &nbsp;· ชีต RM RECORD · {nf(rmData.length)} รายการทั้งหมด · อัปเดตล่าสุด {meta.updatedAt ? new Date(meta.updatedAt).toLocaleString("th-TH") : "—"}
+        </div>
+      </main>
+    </>
+  );
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
